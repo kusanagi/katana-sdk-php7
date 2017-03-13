@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Transport as TransportInterface;
+use Katana\Sdk\File as FileInterface;
 
 class TransportReader implements TransportInterface
 {
@@ -35,7 +36,7 @@ class TransportReader implements TransportInterface
     /**
      * @return string
      */
-    public function getRequestId()
+    public function getRequestId(): string
     {
         return $this->transport->getMeta()->getId();
     }
@@ -43,7 +44,7 @@ class TransportReader implements TransportInterface
     /**
      * @return string
      */
-    public function getRequestTimestamp()
+    public function getRequestTimestamp(): string
     {
         return $this->transport->getMeta()->getDatetime();
     }
@@ -51,7 +52,7 @@ class TransportReader implements TransportInterface
     /**
      * @return array
      */
-    public function getOrigin()
+    public function getOrigin(): array
     {
         return $this->transport->getMeta()->getOrigin();
     }
@@ -61,7 +62,7 @@ class TransportReader implements TransportInterface
      * @param string $default
      * @return string
      */
-    public function getProperty($name, $default = '')
+    public function getProperty(string $name, string $default = ''): string
     {
         return $this->transport->getMeta()->getProperty($name) ?: $default;
     }
@@ -69,7 +70,7 @@ class TransportReader implements TransportInterface
     /**
      * @return array
      */
-    public function getProperties()
+    public function getProperties(): array
     {
         return $this->transport->getMeta()->getProperties();
     }
@@ -77,15 +78,15 @@ class TransportReader implements TransportInterface
     /**
      * @return bool
      */
-    public function hasDownload()
+    public function hasDownload(): bool
     {
         return $this->transport->hasBody();
     }
 
     /**
-     * @return File
+     * @return FileInterface
      */
-    public function getDownload()
+    public function getDownload(): FileInterface
     {
         return $this->transport->getBody();
     }
@@ -97,8 +98,12 @@ class TransportReader implements TransportInterface
      * @param string $action
      * @return array
      */
-    public function getData($address = '', $service = '', $version = '', $action = '')
-    {
+    public function getData(
+        string $address = '',
+        string $service = '',
+        string $version = '',
+        string $action = ''
+    ): array {
         return $this->transport->getData()->get($address, $service, $version, $action);
     }
 
@@ -107,8 +112,10 @@ class TransportReader implements TransportInterface
      * @param string $service
      * @return array
      */
-    public function getRelations($address = '', $service = '')
-    {
+    public function getRelations(
+        string $address = '',
+        string $service = ''
+    ): array {
         return $this->transport->getRelations()->get($address, $service);
     }
 
@@ -117,8 +124,10 @@ class TransportReader implements TransportInterface
      * @param string $service
      * @return array
      */
-    public function getLinks($address = '', $service = '')
-    {
+    public function getLinks(
+        string $address = '',
+        string $service = ''
+    ): array {
         return $this->transport->getLinks()->get($address, $service);
     }
 
@@ -126,7 +135,7 @@ class TransportReader implements TransportInterface
      * @param string $service
      * @return array
      */
-    public function getCalls($service = '')
+    public function getCalls(string $service = ''): array
     {
         return $this->transport->getCalls()->getArray($service);
     }
@@ -135,7 +144,7 @@ class TransportReader implements TransportInterface
      * @param string $service
      * @return array
      */
-    public function getTransactions($service = '')
+    public function getTransactions(string $service = ''): array
     {
         return $this->transport->getTransactions()->getArray($service);
     }
@@ -145,8 +154,10 @@ class TransportReader implements TransportInterface
      * @param string $service
      * @return Error[]
      */
-    public function getErrors($address = '', $service = '')
-    {
+    public function getErrors(
+        string $address = '',
+        string $service = ''
+    ): array {
         return $this->transport->getErrors()->getArray($address, $service);
     }
 }

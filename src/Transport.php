@@ -86,12 +86,14 @@ interface Transport
      * If the optional "action" argument is specified, only data stored under
      * that service, version and action is returned
      *
+     * @param string $address
      * @param string $service
      * @param string $version
      * @param string $action
      * @return array
      */
     public function getData(
+        string $address = '',
         string $service = '',
         string $version = '',
         string $action = ''
