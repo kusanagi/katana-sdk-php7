@@ -33,9 +33,9 @@ interface Response extends ApiInterface
     public function getHttpResponse(): HttpResponse;
 
     /**
-     * @return TransportReader
+     * @return Transport
      */
-    public function getTransport(): TransportReader;
+    public function getTransport();
 
     /**
      * @return string

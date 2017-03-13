@@ -104,7 +104,7 @@ class ResponseApi extends Api implements Response
     /**
      * @return HttpRequest
      */
-    public function getHttpRequest()
+    public function getHttpRequest(): HttpRequest
     {
         return $this->request;
     }
@@ -112,7 +112,7 @@ class ResponseApi extends Api implements Response
     /**
      * @return HttpResponse
      */
-    public function getHttpResponse()
+    public function getHttpResponse(): HttpResponse
     {
         return $this->response;
     }
@@ -128,7 +128,7 @@ class ResponseApi extends Api implements Response
     /**
      * @return string
      */
-    public function getGatewayProtocol()
+    public function getGatewayProtocol(): string
     {
         return $this->protocol;
     }
@@ -136,7 +136,7 @@ class ResponseApi extends Api implements Response
     /**
      * @return string
      */
-    public function getGatewayAddress()
+    public function getGatewayAddress(): string
     {
         return $this->gatewayAddress;
     }
