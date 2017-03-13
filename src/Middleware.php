@@ -51,13 +51,12 @@ class Middleware extends Component
 
     /**
      * @param PayloadMapperInterface $mapper
-     * @return MiddlewareApiFactory
+     * @return ApiFactory
      */
     protected function getApiFactory(
         PayloadMapperInterface $mapper
-    ): MiddlewareApiFactory
+    ): ApiFactory
     {
         return ApiFactory::getMiddlewareFactory($this, $mapper, $this->logger);
     }
-
 }
