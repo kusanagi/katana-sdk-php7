@@ -1,0 +1,155 @@
+{
+    "c": {
+        "n": "json",
+        "a": {
+            "t": "response",
+            "T": {
+                "b": {
+                    "t": null,
+                    "s": 38,
+                    "f": "README.md",
+                    "m": "text/plain",
+                    "p": "/vagrant/example/../README.md"
+                },
+                "t": {
+                    "test": {
+                        "0.1.0": [
+                            {
+                                "a": "rollback"
+                            },
+                            {
+                                "p": [
+                                    {
+                                        "t": "string",
+                                        "v": "",
+                                        "n": "page",
+                                        "l": "query"
+                                    }
+                                ],
+                                "a": "rollfront"
+                            },
+                            {
+                                "p": [
+                                    {
+                                        "t": "string",
+                                        "v": "",
+                                        "n": "page",
+                                        "l": "query"
+                                    },
+                                    {
+                                        "t": "string",
+                                        "v": 5,
+                                        "n": "line",
+                                        "l": "query"
+                                    }
+                                ],
+                                "a": "rollside"
+                            }
+                        ]
+                    }
+                },
+                "c": {
+                    "test": {
+                        "0.1.0": [
+                            {
+                                "a": "read",
+                                "v": "1.0.0",
+                                "n": "user"
+                            },
+                            {
+                                "p": [
+                                    {
+                                        "t": "string",
+                                        "v": "",
+                                        "n": "page",
+                                        "l": "query"
+                                    },
+                                    {
+                                        "t": "string",
+                                        "v": 5,
+                                        "n": "line",
+                                        "l": "query"
+                                    }
+                                ],
+                                "a": "read",
+                                "v": "1.0.0",
+                                "n": "user"
+                            }
+                        ]
+                    }
+                },
+                "l": {
+                    "test": {
+                        "next": "http://example.com?page=2",
+                        "self": "http://example.comaaaaaa"
+                    }
+                },
+                "r": {
+                    "test": {
+                        "qewr": {
+                            "bills": [
+                                "2re3re",
+                                "23ee3",
+                                "f43rf4"
+                            ],
+                            "client": "trtr"
+                        }
+                    }
+                },
+                "d": {
+                    "test": {
+                        "0.1.0": {
+                            "test": [
+                                {
+                                    "created": "2016-06-06T10:12:23.123Z",
+                                    "name": "fdafs",
+                                    "id": "qewr"
+                                },
+                                {
+                                    "created": "2016-06-06T10:12:23.123Z",
+                                    "name": "Clark",
+                                    "id": "gtgb"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "m": {
+                    "p": {
+                        "readme.mime": "text/plain",
+                        "readme.size": 38,
+                        "origin": [ "test", "0.1.0"],
+                        "id2": "query:",
+                        "id": "",
+                        "action": "test",
+                        "foo": "bar"
+                    },
+                    "l": 1,
+                    "o": [ "test", "0.1.0"],
+                    "d": "2016-09-01T14:54:32.300838+00:00",
+                    "i": "01a40006-48ef-451a-bb02-80a604926de3",
+                    "v": "1.0.0-alpha.5"
+                }
+            },
+            "m": {
+                "i": "5459939e-f3df-4ee9-a908-de8773aec761",
+                "v": "1.0.0-alpha.11",
+                "d": "2016-09-14T22:49:51.739796+00:00"
+            },
+            "r": {
+                "b": "",
+                "u": "http:\/\/localhost\/users",
+                "v": "1.1",
+                "m": "POST"
+            },
+            "R": {
+                "b": "",
+                "v": "1.1",
+                "s": "200 OK"
+            }
+        }
+    },
+    "m": {
+        "s": "gateway"
+    }
+}

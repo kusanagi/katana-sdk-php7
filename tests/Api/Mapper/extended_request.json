@@ -1,0 +1,31 @@
+{
+    "command": {
+        "name": "rest",
+        "arguments": {
+            "call": {
+                "service": "test-service",
+                "action": "test-action",
+                "version": "1.0.0",
+                "params": []
+            },
+            "request": {
+                "body": "Request body",
+                "url": "http:\/\/localhost\/users",
+                "version": "1.1",
+                "method": "GET"
+            },
+            "meta": {
+                "version": "1.0.0-alpha.11",
+                "id": "05cb5b6b-dbc2-4e27-86b0-ef1463199c78",
+                "date": "2016-09-14T22:49:37.703915+00:00",
+                "type": 1,
+                "protocol": "http",
+                "gateway": ["12.34.56.78:1234", "http://127.0.0.1:80"],
+                "client": "205.81.5.62:7681"
+            }
+        }
+    },
+    "m": {
+        "s": "gateway"
+    }
+}

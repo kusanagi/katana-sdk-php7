@@ -1,0 +1,26 @@
+{
+    "name": "kusanagi/katana-sdk-php7",
+    "description": "PHP 7 SDK for the KATANA Platform",
+    "homepage": "http://katana.kusanagi.io",
+    "keywords": ["katana", "sdk", "kusanagi"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fernando Castillo",
+            "email": "fernando.castillo@kusanagi.io"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"Katana\\Sdk\\": "src"}
+    },
+    "require": {
+        "php": "^5.6 || ^7.0",
+        "ext-msgpack": "*",
+        "react/react": "^0.4.2",
+        "react/zmq": "^0.3.0",
+        "mkraemer/react-pcntl": "^2.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    }
+}
