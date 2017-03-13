@@ -1,0 +1,160 @@
+{
+  "posts": {
+    "1.0.0": {
+      "a": "12.34.56.78:1234",
+      "f": true,
+      "h": {
+        "b": "/1.0.0"
+      },
+      "ac": {
+        "list": {
+          "x": 1000,
+          "e": "entity:data",
+          "d": ":",
+          "k": "uid",
+          "c": true,
+          "h": {
+            "p": "/posts/{user_id}"
+          },
+          "p": {
+            "user_id": {
+              "t": "string",
+              "f": "uuid",
+              "r": true,
+              "e": false,
+              "h": {
+                "i": "path"
+              }
+            },
+            "tags": {
+              "t": "array",
+              "i": "string",
+              "af": "ssv",
+              "xi": 3,
+              "e": true,
+              "em": [
+                "first",
+                "second",
+                "third",
+                "forth",
+                "fifth"
+              ],
+              "h": {
+                "p": "user_tags"
+              }
+            },
+            "identifier": {
+              "t": "string",
+              "p": "^\\d{5}-\\w{5,8}$",
+              "d": "12345-qwer456",
+              "h": {
+                "g": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "0.2.3": {
+      "a": "12.34.56.78:1233",
+      "f": false,
+      "h": {
+        "b": "/0.2.3"
+      },
+      "ac": {
+        "list": {
+          "x": 1000,
+          "e": "entity:data",
+          "d": ":",
+          "k": "uid",
+          "c": true,
+          "D": true,
+          "h": {
+            "p": "/posts",
+            "method": "post",
+            "input": "form-data",
+            "body": "application/json"
+          },
+          "p": {
+            "user_id": {
+              "t": "string",
+              "f": "uuid",
+              "e": false,
+              "h": {
+                "i": "path"
+              }
+            }
+          },
+          "E": {
+            "F": [
+              {
+                "n": "details",
+                "f": [
+                  {
+                    "n": "name",
+                    "t": "string"
+                  },
+                  {
+                    "n": "active",
+                    "t": "boolean",
+                    "o": true
+                  }
+                ]
+              }
+            ],
+            "f": [
+              {
+                "n": "id",
+                "t": "integer"
+              }
+            ],
+            "V": true
+          },
+          "r": [
+            {
+              "n": "accounts"
+            },
+            {
+              "n": "posts",
+              "t": "many"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "admin": {
+    "1.0.0": {
+      "a": "12.34.56.78:1235",
+      "f": false,
+      "h": {
+        "g": false
+      },
+      "ac": {
+        "check": {
+          "x": 1000,
+          "k": "uid",
+          "c": true,
+          "p": {
+            "user_id": {
+              "t": "string",
+              "f": "uuid",
+              "e": false,
+              "h": {
+                "i": "path"
+              }
+            }
+          },
+          "f": {
+            "rules": {
+              "m": "text/plain,text/csv",
+              "r": true,
+              "mx": 128000,
+              "mn": 256
+            }
+          }
+        }
+      }
+    }
+  }
+}

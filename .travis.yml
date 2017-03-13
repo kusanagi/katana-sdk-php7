@@ -1,0 +1,19 @@
+dist: trusty
+
+language: php
+php:
+  - 7.0
+  - 7.1
+
+install:
+  - composer install --ignore-platform-reqs
+  - composer require satooshi/php-coveralls --ignore-platform-reqs
+
+before_script:
+  - mkdir -p build/logs
+
+script:
+  - vendor/bin/phpunit --configuration phpunit.xml.dist --coverage-clover build/logs/clover.xml
+
+after_success:
+  - sh -c 'if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then php vendor/bin/coveralls -v; fi;'

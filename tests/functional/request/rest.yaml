@@ -1,0 +1,15 @@
+"@context": "urn:katana:middleware"
+name: rest
+version: 0.1.0
+request: true
+response: true
+info:
+- title: Rest Middleware
+  description: Provides a REST input parser and a json output formatter
+engine:
+- runner: "urn:katana:runner:php5"
+  path: file:./middlewares/rest.php
+  timeout: 2000
+  variable:
+    - name: interpreter
+      value: php5.6
