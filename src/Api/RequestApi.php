@@ -24,7 +24,7 @@ use Katana\Sdk\Logger\KatanaLogger;
 use Katana\Sdk\Request;
 use Katana\Sdk\Schema\Mapping;
 use Katana\Sdk\Response;
-use Katana\Sdk\Param;
+use Katana\Sdk\Param as ParamInterface;
 
 class RequestApi extends Api implements Request
 {
@@ -241,15 +241,15 @@ class RequestApi extends Api implements Request
 
     /**
      * @param string $name
-     * @return Param
+     * @return ParamInterface
      */
-    public function getParam(string $name): Param
+    public function getParam(string $name): ParamInterface
     {
         return $this->call->getParam($name);
     }
 
     /**
-     * @return Param[]
+     * @return ParamInterface[]
      */
     public function getParams(): array
     {
@@ -260,21 +260,21 @@ class RequestApi extends Api implements Request
      * @param string $name
      * @param string $value
      * @param string $type
-     * @return Param
+     * @return ParamInterface
      */
     public function newParam(
         string $name,
         $value = '',
         $type = Param::TYPE_STRING
-    ): Param {
+    ): ParamInterface {
         return $this->call->newParam($name, $value, $type);
     }
 
     /**
-     * @param Param $param
+     * @param ParamInterface $param
      * @return ParamContainerInterface
      */
-    public function setParam(Param $param): ParamContainerInterface
+    public function setParam(ParamInterface $param): ParamContainerInterface
     {
         $this->call->setParam($param);
 

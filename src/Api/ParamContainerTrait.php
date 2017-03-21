@@ -15,15 +15,17 @@
 
 namespace Katana\Sdk\Api;
 
+use Katana\Sdk\Param as ParamInterface;
+
 trait ParamContainerTrait
 {
     use ParamAccessorTrait;
 
     /**
-     * @param Param $param
+     * @param ParamInterface $param
      * @return bool
      */
-    public function setParam(Param $param)
+    public function setParam(ParamInterface $param)
     {
         $this->params[$param->getName()] = $param;
 

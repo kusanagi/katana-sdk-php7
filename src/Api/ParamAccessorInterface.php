@@ -15,7 +15,7 @@
 
 namespace Katana\Sdk\Api;
 
-use Katana\Sdk\Param;
+use Katana\Sdk\Param as ParamInterface;
 
 interface ParamAccessorInterface
 {
@@ -27,12 +27,12 @@ interface ParamAccessorInterface
 
     /**
      * @param string $name
-     * @return Param
+     * @return ParamInterface
      */
-    public function getParam(string $name): Param;
+    public function getParam(string $name): ParamInterface;
 
     /**
-     * @return Param[]
+     * @return ParamInterface[]
      */
     public function getParams(): array;
 
@@ -40,11 +40,11 @@ interface ParamAccessorInterface
      * @param string $name
      * @param mixed $value
      * @param string $type
-     * @return Param
+     * @return ParamInterface
      */
     public function newParam(
         string $name,
         $value = '',
         $type = Param::TYPE_STRING
-    ): Param;
+    ): ParamInterface;
 }
