@@ -15,7 +15,7 @@
 
 namespace Katana\Sdk\Api;
 
-use Katana\Sdk\Param;
+use Katana\Sdk\Param as ParamInterface;
 
 interface ParamContainerInterface extends ParamAccessorInterface
 {
@@ -23,5 +23,5 @@ interface ParamContainerInterface extends ParamAccessorInterface
      * @param Param $param
      * @return ParamContainerInterface
      */
-    public function setParam(Param $param): ParamContainerInterface;
+    public function setParam(ParamInterface $param): ParamContainerInterface;
 }

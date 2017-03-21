@@ -14,7 +14,7 @@
         "psr-4": {"Katana\\Sdk\\": "src"}
     },
     "require": {
-        "php": "^5.6 || ^7.0",
+        "php": "^7.0",
         "ext-msgpack": "*",
         "react/react": "^0.4.2",
         "react/zmq": "^0.3.0",
