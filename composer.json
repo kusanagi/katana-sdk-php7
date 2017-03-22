@@ -1,7 +1,7 @@
 {
     "name": "kusanagi/katana-sdk-php7",
-    "description": "PHP 7 SDK for the KATANA Platform",
-    "homepage": "http://katana.kusanagi.io",
+    "description": "PHP7 SDK for the KATANA Framework",
+    "homepage": "https://kusanagi.io",
     "keywords": ["katana", "sdk", "kusanagi"],
     "license": "MIT",
     "authors": [
