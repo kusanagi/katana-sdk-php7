@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Api\Factory;
 
 use Katana\Sdk\Api\ActionApi;
+use Katana\Sdk\Api\TypeCatalog;
 use Katana\Sdk\Console\CliInput;
 use Katana\Sdk\Mapper\CompactTransportMapper;
 use Katana\Sdk\Messaging\MessagePackSerializer;
@@ -68,6 +69,7 @@ class ServiceApiFactory extends ApiFactory
             $action,
             $caller,
             $this->mapper->getTransport($data),
+            new TypeCatalog(),
             $this->mapper->getParams($data)
         );
     }
