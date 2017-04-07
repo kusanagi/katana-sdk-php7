@@ -20,6 +20,7 @@ use Katana\Sdk\Api\DeferCall;
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\TransportMeta;
+use Katana\Sdk\Api\TypeCatalog;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Exception\InvalidValueException;
 use Katana\Sdk\Logger\KatanaLogger;
@@ -84,7 +85,8 @@ class ActionApiTest extends TestCase
             true,
             'action',
             $caller->reveal(),
-            $this->transport->reveal()
+            $this->transport->reveal(),
+            new TypeCatalog()
         );
     }
 
