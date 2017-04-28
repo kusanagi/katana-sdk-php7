@@ -657,7 +657,7 @@ class CompactTransportMapper
         }
 
         // Merge Body
-        if (!$transport->hasBody()) {
+        if (!$transport->hasBody() && $mergeData['b']) {
             $transport->setBody(new File(
                 'body',
                 $mergeData['b']['p'],

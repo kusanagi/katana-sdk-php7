@@ -377,7 +377,7 @@ class ActionApi extends Api implements Action
      * @param array $params
      * @param array $files
      * @param int $timeout
-     * @return Action
+     * @return mixed
      */
     public function call(
         string $service,
@@ -386,8 +386,7 @@ class ActionApi extends Api implements Action
         array $params = [],
         array $files = [],
         int $timeout = 1000
-    ): Action
-    {
+    ) {
         $address = 'ipc://@katana-' . preg_replace(
             '/[^a-zA-Z0-9-]/',
             '-',
