@@ -44,6 +44,19 @@ class ZeroMQRuntimeCaller
     private $mapper;
 
     /**
+     * @param Param $param
+     * @return array
+     */
+    private function writeParam(Param $param)
+    {
+        return [
+            'n' => $param->getName(),
+            'v' => $param->getValue(),
+            't' => $param->getType(),
+        ];
+    }
+
+    /**
      * @param MessagePackSerializer $serializer
      * @param CompactTransportMapper $mapper
      * @param $socket
@@ -89,7 +102,7 @@ class ZeroMQRuntimeCaller
                         $target->getAction()
                     ],
                     'T' => $this->mapper->writeTransport($transport),
-                    'p' => $params,
+                    'p' => array_map([$this, 'writeParam'], $params),
                     'f' => $files,
                 ],
             ],
