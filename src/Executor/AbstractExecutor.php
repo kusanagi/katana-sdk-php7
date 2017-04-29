@@ -22,6 +22,7 @@ use Katana\Sdk\Api\Mapper\PayloadWriterInterface;
 use Katana\Sdk\Console\CliInput;
 use Katana\Sdk\Logger\KatanaLogger;
 use Katana\Sdk\Messaging\Responder\ResponderInterface;
+use Throwable;
 
 /**
  * Base class for component executors
@@ -75,7 +76,7 @@ abstract class AbstractExecutor
     ) {
         try {
             $response = $callbacks[$action]($api);
-        } catch (Exception $response) {
+        } catch (Throwable $response) {
             // Catch as response to allow return or throw Exception
         }
 
@@ -85,7 +86,7 @@ abstract class AbstractExecutor
             return true;
         }
 
-        if (!$response instanceof Exception) {
+        if (!$response instanceof Throwable) {
             $response = new Exception('Wrong return from callback');
         }
 
