@@ -52,7 +52,7 @@ class TransportReader implements TransportInterface
     /**
      * @return array
      */
-    public function getOrigin(): array
+    public function getOriginService(): array
     {
         return $this->transport->getMeta()->getOrigin();
     }
