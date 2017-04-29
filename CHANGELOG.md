@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.3] - 2017-04-29
+- Rename method to `Transport::getOriginService`
+- Catch `Throwable` to recover from more errors
+
 ## [1.0.2] - 2017-04-28
 ### Changed
 - Fixed sending params to runtime call
