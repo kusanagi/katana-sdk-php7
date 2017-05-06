@@ -140,10 +140,10 @@ class SchemaMapper
                 );
             }
 
-            if ($this->read($action, 'R')) {
+            if ($this->read($action, 'rv')) {
                 $return = new ActionReturn(
-                    $this->read($action, 'R.t'),
-                    $this->read($action, 'R.e', false)
+                    $this->read($action, 'rv.t'),
+                    $this->read($action, 'rv.e', false)
                 );
             } else {
                 $return = null;

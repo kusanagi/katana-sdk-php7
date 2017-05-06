@@ -17,7 +17,9 @@ namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Api\Protocol\Http\HttpRequest;
 use Katana\Sdk\Api\Protocol\Http\HttpResponse;
+use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Component\Component;
+use Katana\Sdk\Exception\InvalidValueException;
 use Katana\Sdk\Logger\KatanaLogger;
 use Katana\Sdk\Response;
 use Katana\Sdk\Schema\Mapping;
@@ -51,6 +53,11 @@ class ResponseApi extends Api implements Response
     private $gatewayAddress;
 
     /**
+     * @var ReturnValue
+     */
+    private $return;
+
+    /**
      * Response constructor.
      * @param KatanaLogger $logger
      * @param Component $component
@@ -65,7 +72,8 @@ class ResponseApi extends Api implements Response
      * @param HttpResponse $response
      * @param Transport $transport
      * @param string $protocol
-     * @param string $gatewayAddress
+     * @param string $gatewayAddress,
+     * @param ReturnValue $return
      */
     public function __construct(
         KatanaLogger $logger,
@@ -81,7 +89,8 @@ class ResponseApi extends Api implements Response
         HttpResponse $response,
         Transport $transport,
         $protocol,
-        $gatewayAddress
+        $gatewayAddress,
+        ReturnValue $return
     ) {
         parent::__construct(
             $logger,
@@ -99,6 +108,7 @@ class ResponseApi extends Api implements Response
         $this->transport = $transport;
         $this->protocol = $protocol;
         $this->gatewayAddress = $gatewayAddress;
+        $this->return = $return;
     }
 
     /**
@@ -139,5 +149,32 @@ class ResponseApi extends Api implements Response
     public function getGatewayAddress(): string
     {
         return $this->gatewayAddress;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasReturn(): bool
+    {
+        return $this->return->exists();
+    }
+
+    /**
+     * @return mixed
+     * @throws InvalidValueException
+     */
+    public function getReturn()
+    {
+        try {
+            return $this->return->getValue();
+        } catch (InvalidValueException $e) {
+            list ($service, $version, $action) = $this->getTransport()->getOriginService();
+            throw new InvalidValueException(sprintf(
+                'No return value defined on "%s" (%s) for action: "%s"',
+                $service,
+                $version,
+                $action
+            ));
+        }
     }
 }

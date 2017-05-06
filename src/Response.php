@@ -46,4 +46,18 @@ interface Response extends ApiInterface
      * @return string
      */
     public function getGatewayAddress(): string;
+
+    /**
+     * Determine whether or not the initial **Service** has a return value.
+     *
+     * @return bool
+     */
+    public function hasReturn(): bool;
+
+    /**
+     * Return the value returned by the initial **Service**.
+     *
+     * @return mixed
+     */
+    public function getReturn();
 }
