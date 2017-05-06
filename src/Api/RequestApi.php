@@ -18,6 +18,7 @@ namespace Katana\Sdk\Api;
 use Katana\Sdk\Api\Protocol\Http\HttpRequest;
 use Katana\Sdk\Api\Protocol\Http\HttpResponse;
 use Katana\Sdk\Api\Protocol\Http\HttpStatus;
+use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Logger\KatanaLogger;
@@ -186,7 +187,8 @@ class RequestApi extends Api implements Request
             ),
             Transport::newEmpty(),
             $this->protocol,
-            $this->gatewayAddress
+            $this->gatewayAddress,
+            new ReturnValue()
         );
     }
 

@@ -17,6 +17,7 @@ namespace Katana\Sdk\Api\Mapper;
 
 use Katana\Sdk\Api\ActionApi;
 use Katana\Sdk\Api\DeferCall;
+use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Api\Error;
 use Katana\Sdk\Api\File;
@@ -261,6 +262,19 @@ class ExtendedPayloadMapper implements PayloadMapperInterface
     public function getClientAddress(array $raw)
     {
         return $raw['command']['arguments']['meta']['client'];
+    }
+
+    /**
+     * @param array $raw
+     * @return string
+     */
+    public function getReturnValue(array $raw)
+    {
+        if (isset($raw['command']['arguments']['return'])) {
+            return new ReturnValue($raw['command']['arguments']['return'], true);
+        } else {
+            return new ReturnValue();
+        }
     }
 
     /**
