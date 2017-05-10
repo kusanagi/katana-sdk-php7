@@ -85,6 +85,7 @@ class TransportCalls
                 'n' => $call->getService(),
                 'v' => $call->getVersion(),
                 'a' => $call->getAction(),
+                'd' => $call->getDuration(),
                 'p' => array_map(function (Param $param) {
                     return [
                         'n' => $param->getName(),

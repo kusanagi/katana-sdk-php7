@@ -50,6 +50,11 @@ class DeferCall
     private $action;
 
     /**
+     * @var int
+     */
+    private $duration = 0;
+
+    /**
      * @var Param[]
      */
     private $params = [];
@@ -66,6 +71,7 @@ class DeferCall
      * @param string $service
      * @param VersionString $version
      * @param string $action
+     * @param int $duration
      * @param Param[] $params
      * @param File[] $files
      */
@@ -75,6 +81,7 @@ class DeferCall
         $service,
         VersionString $version,
         $action,
+        int $duration,
         array $params = [],
         array $files = []
     ) {
@@ -83,6 +90,7 @@ class DeferCall
         $this->service = $service;
         $this->version = $version;
         $this->action = $action;
+        $this->duration = $duration;
         $this->params = $params;
         $this->files = $files;
     }
@@ -125,6 +133,14 @@ class DeferCall
     public function getAction()
     {
         return $this->action;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDuration(): int
+    {
+        return $this->duration;
     }
 
     /**
