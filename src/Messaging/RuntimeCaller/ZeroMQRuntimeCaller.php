@@ -132,7 +132,7 @@ class ZeroMQRuntimeCaller
                 throw new RuntimeCallException("Error response: {$response['E']['m']}");
             } else {
                 echo json_encode($response), "\n";
-                $return = $response['cr']['r']['R'];
+                $return = $response['cr']['r']['rv'];
                 $this->mapper->merge($transport, $response['cr']['r']['T']);
             }
 
