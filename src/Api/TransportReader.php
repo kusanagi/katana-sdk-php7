@@ -58,6 +58,14 @@ class TransportReader implements TransportInterface
     }
 
     /**
+     * @return int
+     */
+    public function getOriginDuration(): int
+    {
+        return $this->transport->getMeta()->getDuration();
+    }
+
+    /**
      * @param string $name
      * @param string $default
      * @return string

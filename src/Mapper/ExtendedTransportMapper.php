@@ -114,6 +114,9 @@ class ExtendedTransportMapper
             $rawMeta['version'],
             $rawMeta['id'],
             $rawMeta['datetime'],
+            $rawMeta['start_time'],
+            $rawMeta['end_time'],
+            $rawMeta['duration'],
             $rawMeta['gateway'],
             $rawMeta['origin'],
             $rawMeta['level'],
@@ -132,6 +135,9 @@ class ExtendedTransportMapper
             'version' => $meta->getVersion(),
             'id' => $meta->getId(),
             'datetime' => $meta->getDatetime(),
+            'start_time' => $meta->getStartTime(),
+            'end_time' => $meta->getEndTime(),
+            'duration' => $meta->getDuration(),
             'gateway' => $meta->getGateway(),
             'origin' => $meta->getOrigin(),
             'level' => $meta->getLevel(),
@@ -347,6 +353,7 @@ class ExtendedTransportMapper
                             $callData['name'],
                             new VersionString($callData['version']),
                             $callData['action'],
+                            $callData['duration'],
                             isset($callData['params'])? array_map([$this, 'getParam'], $callData['params']) : []
                         );
                     }, $versionCalls);
@@ -369,6 +376,7 @@ class ExtendedTransportMapper
                 'name' => $call->getService(),
                 'version' => $call->getVersion(),
                 'action' => $call->getAction(),
+                'duration' => $call->getDuration(),
                 'caller' => $call->getCaller(),
             ];
 
