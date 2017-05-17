@@ -30,6 +30,7 @@ class TypeCatalog
     const TYPE_STRING  = 'string';
     const TYPE_ARRAY   = 'array';
     const TYPE_OBJECT  = 'object';
+    const TYPE_BINARY  = 'binary';
 
     /**
      * @param array $value
@@ -70,6 +71,7 @@ class TypeCatalog
             case self::TYPE_FLOAT:
                 return 0;
             case self::TYPE_STRING:
+            case self::TYPE_BINARY:
                 return '';
             case self::TYPE_ARRAY:
             case self::TYPE_OBJECT:
@@ -110,6 +112,8 @@ class TypeCatalog
                     return false;
                 }
                 return $this->isObjectType($value);
+            case self::TYPE_BINARY:
+                return is_string($value);
         }
 
         throw new InvalidValueException("Invalid value type: $type");

@@ -84,6 +84,14 @@ class TypeCatalogTest extends TestCase
         );
     }
 
+    public function testBinaryDefault()
+    {
+        $this->assertEquals(
+            '',
+            $this->typeCatalog->getDefault(TypeCatalog::TYPE_BINARY)
+        );
+    }
+
     public function validateDataProvider()
     {
         return [
@@ -97,6 +105,7 @@ class TypeCatalogTest extends TestCase
             [false, TypeCatalog::TYPE_NULL, 3.1416],
             [false, TypeCatalog::TYPE_NULL, ''],
             [false, TypeCatalog::TYPE_NULL, 'foo'],
+            [false, TypeCatalog::TYPE_NULL, "\x01\x02"],
             [false, TypeCatalog::TYPE_NULL, []],
             [false, TypeCatalog::TYPE_NULL, ['a', 'b', 'c']],
             [false, TypeCatalog::TYPE_NULL, ['a' => 1, 'b' => 2]],
@@ -110,6 +119,7 @@ class TypeCatalogTest extends TestCase
             [false, TypeCatalog::TYPE_BOOLEAN, 3.1416],
             [false, TypeCatalog::TYPE_BOOLEAN, ''],
             [false, TypeCatalog::TYPE_BOOLEAN, 'foo'],
+            [false, TypeCatalog::TYPE_BOOLEAN, "\x01\x02"],
             [false, TypeCatalog::TYPE_BOOLEAN, []],
             [false, TypeCatalog::TYPE_BOOLEAN, ['a', 'b', 'c']],
             [false, TypeCatalog::TYPE_BOOLEAN, ['a' => 1, 'b' => 2]],
@@ -123,6 +133,7 @@ class TypeCatalogTest extends TestCase
             [false, TypeCatalog::TYPE_INTEGER, 3.1416],
             [false, TypeCatalog::TYPE_INTEGER, ''],
             [false, TypeCatalog::TYPE_INTEGER, 'foo'],
+            [false, TypeCatalog::TYPE_INTEGER, "\x01\x02"],
             [false, TypeCatalog::TYPE_INTEGER, []],
             [false, TypeCatalog::TYPE_INTEGER, ['a', 'b', 'c']],
             [false, TypeCatalog::TYPE_INTEGER, ['a' => 1, 'b' => 2]],
@@ -136,6 +147,7 @@ class TypeCatalogTest extends TestCase
             [true, TypeCatalog::TYPE_FLOAT, 3.1416],
             [false, TypeCatalog::TYPE_FLOAT, ''],
             [false, TypeCatalog::TYPE_FLOAT, 'foo'],
+            [false, TypeCatalog::TYPE_FLOAT, "\x01\x02"],
             [false, TypeCatalog::TYPE_FLOAT, []],
             [false, TypeCatalog::TYPE_FLOAT, ['a', 'b', 'c']],
             [false, TypeCatalog::TYPE_FLOAT, ['a' => 1, 'b' => 2]],
@@ -149,6 +161,7 @@ class TypeCatalogTest extends TestCase
             [false, TypeCatalog::TYPE_STRING, 3.1416],
             [true, TypeCatalog::TYPE_STRING, ''],
             [true, TypeCatalog::TYPE_STRING, 'foo'],
+            [true, TypeCatalog::TYPE_STRING, "\x01\x02"],
             [false, TypeCatalog::TYPE_STRING, []],
             [false, TypeCatalog::TYPE_STRING, ['a', 'b', 'c']],
             [false, TypeCatalog::TYPE_STRING, ['a' => 1, 'b' => 2]],
@@ -162,6 +175,7 @@ class TypeCatalogTest extends TestCase
             [false, TypeCatalog::TYPE_ARRAY, 3.1416],
             [false, TypeCatalog::TYPE_ARRAY, ''],
             [false, TypeCatalog::TYPE_ARRAY, 'foo'],
+            [false, TypeCatalog::TYPE_ARRAY, "\x01\x02"],
             [true, TypeCatalog::TYPE_ARRAY, []],
             [true, TypeCatalog::TYPE_ARRAY, ['a', 'b', 'c']],
             [false, TypeCatalog::TYPE_ARRAY, ['a' => 1, 'b' => 2]],
@@ -175,9 +189,24 @@ class TypeCatalogTest extends TestCase
             [false, TypeCatalog::TYPE_OBJECT, 3.1416],
             [false, TypeCatalog::TYPE_OBJECT, ''],
             [false, TypeCatalog::TYPE_OBJECT, 'foo'],
+            [false, TypeCatalog::TYPE_OBJECT, "\x01\x02"],
             [true, TypeCatalog::TYPE_OBJECT, []],
             [false, TypeCatalog::TYPE_OBJECT, ['a', 'b', 'c']],
             [true, TypeCatalog::TYPE_OBJECT, ['a' => 1, 'b' => 2]],
+            // Type Binary
+            [false, TypeCatalog::TYPE_BINARY, null],
+            [false, TypeCatalog::TYPE_BINARY, false],
+            [false, TypeCatalog::TYPE_BINARY, true],
+            [false, TypeCatalog::TYPE_BINARY, 0],
+            [false, TypeCatalog::TYPE_BINARY, 42],
+            [false, TypeCatalog::TYPE_BINARY, 0.0],
+            [false, TypeCatalog::TYPE_BINARY, 3.1416],
+            [true, TypeCatalog::TYPE_BINARY, ''],
+            [true, TypeCatalog::TYPE_BINARY, 'foo'],
+            [true, TypeCatalog::TYPE_BINARY, "\x01\x02"],
+            [false, TypeCatalog::TYPE_BINARY, []],
+            [false, TypeCatalog::TYPE_BINARY, ['a', 'b', 'c']],
+            [false, TypeCatalog::TYPE_BINARY, ['a' => 1, 'b' => 2]],
         ];
     }
 
