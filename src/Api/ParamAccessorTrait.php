@@ -67,13 +67,13 @@ trait ParamAccessorTrait
 
     /**
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      * @param string $type
      * @return ParamInterface
      */
     public function newParam(
         string $name,
-        string $value = '',
+        $value = '',
         string $type = Param::TYPE_STRING
     ): ParamInterface {
         return new Param($name, $value, $type);
