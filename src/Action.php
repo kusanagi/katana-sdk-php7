@@ -50,13 +50,13 @@ interface Action extends ApiInterface
 
     /**
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      * @param string $type
      * @return Param
      */
     public function newParam(
         string $name,
-        string $value = '',
+        $value = '',
         string $type = Param::TYPE_STRING
     ): Param;
 
