@@ -63,7 +63,7 @@ class Param implements ParamInterface
             case self::TYPE_ARRAY:
                 return (array) $value;
             case self::TYPE_OBJECT:
-                return (object) $value;
+                return json_decode(json_encode($value));
             case self::TYPE_STRING:
                 return $value;
         }
