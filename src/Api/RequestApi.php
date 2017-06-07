@@ -167,7 +167,7 @@ class RequestApi extends Api implements Request
      * @param string $text
      * @return Response
      */
-    public function newResponse(int $code, string $text): Response
+    public function newResponse(int $code = 200, string $text = 'OK'): Response
     {
         return new ResponseApi(
             $this->logger,
