@@ -59,7 +59,7 @@ interface Request extends ApiInterface, ParamContainerInterface
      * @param string $text
      * @return Response
      */
-    public function newResponse(int $code, string $text): Response;
+    public function newResponse(int $code = 200, string $text = 'OK'): Response;
 
     /**
      * @return HttpRequest
