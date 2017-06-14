@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Messaging;
 
 use MessagePack\BufferUnpacker;
+use MessagePack\Packer;
 
 class MessagePackSerializer
 {
@@ -26,11 +27,8 @@ class MessagePackSerializer
      */
     public function serialize($message)
     {
-        if (!function_exists('msgpack_pack')) {
-            throw new \Exception('Message pack extension not found');
-        }
-
-        return msgpack_pack($message);
+        $pack = new Packer();
+        return $pack->pack($message);
     }
 
     /**
@@ -40,20 +38,9 @@ class MessagePackSerializer
      */
     public function unserialize($message)
     {
-        if (!function_exists('msgpack_unpack')) {
-            throw new \Exception('Message pack extension not found');
-        }
+        $unpacker = new BufferUnpacker();
+        $unpacker->reset($message);
 
-        // msgpack version lower than 2.* result in segfault on unpack
-        $msgpackVersion = phpversion("msgpack");
-        if (explode('.', $msgpackVersion)[0] < 2) {
-            // Fallback msgpack library
-            $unpacker = new BufferUnpacker();
-            $unpacker->reset($message);
-
-            return $unpacker->unpack();
-        }
-
-        return msgpack_unpack($message);
+        return $unpacker->unpack();
     }
 }
