@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.2] - 2017-06-14
+## Changed
+- Replaced msgpack dependency to avoid misbehaviour with references
+
 ## [1.1.1] - 2017-06-07
 ## Fixed
 - Fixed optional parameters in Request::newResponse() method
