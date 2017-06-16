@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.3] - 2017-06-16
+## Fixed
+- Fixed merge of errors in the transport
+
 ## [1.1.2] - 2017-06-14
 ## Changed
 - Replaced msgpack dependency to avoid misbehaviour with references
