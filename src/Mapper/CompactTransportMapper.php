@@ -654,14 +654,16 @@ class CompactTransportMapper
         foreach ($mergeData['e'] as $address => $aErrors) {
             foreach ($aErrors as $service => $sErrors) {
                 foreach ($sErrors as $version => $vErrors) {
-                    $transport->addError(new Error(
-                        $address,
-                        $service,
-                        $version,
-                        $vErrors['m'],
-                        $vErrors['c'],
-                        $vErrors['s']
-                    ));
+                    foreach ($vErrors as $error) {
+                        $transport->addError(new Error(
+                            $address,
+                            $service,
+                            $version,
+                            $error['m'],
+                            $error['c'],
+                            $error['s']
+                        ));
+                    }
                 }
             }
         }
