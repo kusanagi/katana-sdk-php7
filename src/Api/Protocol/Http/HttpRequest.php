@@ -75,13 +75,13 @@ class HttpRequest
      * @param File[] $files
      */
     public function __construct(
-        $version,
-        $method,
-        $url,
+        string $version,
+        string $method,
+        string $url,
         array $query = [],
         array $postData = [],
         array $headers = [],
-        $body = '',
+        string $body = '',
         array $files = []
     ) {
         $this->version = $version;
@@ -98,7 +98,7 @@ class HttpRequest
      * @param string $method
      * @return bool
      */
-    public function isMethod($method)
+    public function isMethod(string $method): bool
     {
         return $this->method === $method;
     }
@@ -106,7 +106,7 @@ class HttpRequest
     /**
      * @return string
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->method;
     }
@@ -114,7 +114,7 @@ class HttpRequest
     /**
      * @return string
      */
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->url;
     }
@@ -122,25 +122,25 @@ class HttpRequest
     /**
      * @return string
      */
-    public function getUrlScheme()
+    public function getUrlScheme(): string
     {
-        return parse_url($this->url, PHP_URL_SCHEME);
+        return parse_url($this->url, PHP_URL_SCHEME) ?: '';
     }
 
     /**
      * @return string
      */
-    public function getUrlHost()
+    public function getUrlHost(): string
     {
-        return parse_url($this->url, PHP_URL_HOST);
+        return parse_url($this->url, PHP_URL_HOST) ?: '';
     }
 
     /**
      * @return string
      */
-    public function getUrlPath()
+    public function getUrlPath(): string
     {
-        return parse_url($this->url, PHP_URL_PATH);
+        return parse_url($this->url, PHP_URL_PATH) ?: '';
     }
 
     /**
