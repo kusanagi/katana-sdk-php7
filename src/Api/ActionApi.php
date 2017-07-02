@@ -59,6 +59,11 @@ class ActionApi extends Api implements Action
     private $return;
 
     /**
+     * @var TypeCatalog
+     */
+    private $typeCatalog;
+
+    /**
      * Action constructor.
      * @param KatanaLogger $logger
      * @param Component $component
@@ -72,6 +77,7 @@ class ActionApi extends Api implements Action
      * @param string $actionName
      * @param ZeroMQRuntimeCaller $caller
      * @param Transport $transport
+     * @param TypeCatalog $typeCatalog
      * @param Param[] $params
      */
     public function __construct(
@@ -87,6 +93,7 @@ class ActionApi extends Api implements Action
         string $actionName,
         ZeroMQRuntimeCaller $caller,
         Transport $transport,
+        TypeCatalog $typeCatalog,
         array $params = []
     ) {
         parent::__construct(
@@ -105,25 +112,8 @@ class ActionApi extends Api implements Action
         $this->caller = $caller;
         $this->transport = $transport;
         $this->transportCopy = clone $transport;
+        $this->typeCatalog = $typeCatalog;
         $this->params = $this->prepareParams($params);
-    }
-
-    /**
-     * @param array $value
-     * @return bool
-     */
-    private function isArrayType(array $value): bool
-    {
-        return array_keys($value) === range(0, count($value) -1);
-    }
-
-    /**
-     * @param array $value
-     * @return bool
-     */
-    private function isObjectType(array $value): bool
-    {
-        return count(array_filter(array_keys($value), 'is_string')) === count($value);
     }
 
     /**
@@ -247,8 +237,9 @@ class ActionApi extends Api implements Action
      */
     public function setEntity(array $entity): Action
     {
-        if (!$this->isObjectType($entity)) {
-            throw new TransportException('Unexpected collection');
+        $type = $this->typeCatalog::TYPE_OBJECT;
+        if (!$this->typeCatalog->validate($type, $entity)) {
+            throw new TransportException('Invalid Entity');
         }
 
         $this->transport->setData($this->name, $this->version, $this->actionName, $entity);
@@ -263,8 +254,9 @@ class ActionApi extends Api implements Action
      */
     public function setCollection(array $collection): Action
     {
-        if (!$this->isArrayType($collection)) {
-            throw new TransportException('Unexpected entity');
+        $type = $this->typeCatalog::TYPE_ARRAY;
+        if (!$this->typeCatalog->validate($type, $collection)) {
+            throw new TransportException('Invalid Collection');
         }
 
         $this->transport->setCollection($this->name, $this->version, $this->actionName, $collection);
@@ -385,7 +377,7 @@ class ActionApi extends Api implements Action
      * @param array $params
      * @param array $files
      * @param int $timeout
-     * @return Action
+     * @return mixed
      */
     public function call(
         string $service,
@@ -394,8 +386,7 @@ class ActionApi extends Api implements Action
         array $params = [],
         array $files = [],
         int $timeout = 1000
-    ): Action
-    {
+    ) {
         $address = 'ipc://@katana-' . preg_replace(
             '/[^a-zA-Z0-9-]/',
             '-',
@@ -448,6 +439,7 @@ class ActionApi extends Api implements Action
             $service,
             $versionString,
             $action,
+            0,
             $params
         ));
 
@@ -507,6 +499,7 @@ class ActionApi extends Api implements Action
             $service,
             $versionString,
             $action,
+            0,
             $timeout,
             $params
         ));
@@ -570,7 +563,7 @@ class ActionApi extends Api implements Action
                 ));
             }
 
-            if (!$this->validate($value, $action->getReturnType())) {
+            if (!$this->typeCatalog->validate($action->getReturnType(), $value)) {
                 throw new InvalidValueException(sprintf(
                     'Invalid return type given in "%s" (%s) for action: "%s"',
                     $this->name,
@@ -614,60 +607,7 @@ class ActionApi extends Api implements Action
             $service = $this->getServiceSchema($this->name, $this->version);
             $action = $service->getActionSchema($this->actionName);
 
-            return $this->getDefaultReturn($action->getReturnType());
+            return $this->typeCatalog->getDefault($action->getReturnType());
         }
-    }
-
-    /**
-     * @param string $type
-     * @return mixed
-     * @throws InvalidValueException
-     */
-    private function getDefaultReturn(string $type)
-    {
-        switch ($type) {
-            case 'null':
-                return null;
-            case 'boolean':
-                return false;
-            case 'integer':
-            case 'float':
-                return 0;
-            case 'string':
-                return '';
-            case 'array':
-            case 'object':
-                return [];
-        }
-
-        throw new InvalidValueException("Invalid value type: $type");
-    }
-
-    /**
-     * @param mixed $value
-     * @param string $type
-     * @return bool
-     * @throws InvalidValueException
-     */
-    private function validate($value, string $type): bool
-    {
-        switch ($type) {
-            case 'null':
-                return is_null($value);
-            case 'boolean':
-                return is_bool($value);
-            case 'integer':
-                return is_integer($value);
-            case 'float':
-                return is_float($value);
-            case 'string':
-                return is_string($value);
-            case 'array':
-                return $this->isArrayType($value);
-            case 'object':
-                return $this->isObjectType($value);
-        }
-
-        throw new InvalidValueException("Invalid value type: $type");
     }
 }

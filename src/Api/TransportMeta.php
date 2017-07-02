@@ -36,11 +36,32 @@ class TransportMeta
     private $id;
 
     /**
-     * Datetime of the process in UTC and ISO 8601
+     * Datetime of the process in UTC and ISO 8601.
      *
      * @var string
      */
     private $datetime;
+
+    /**
+     * The datetime of the start of the current call in UTC and ISO 8601.
+     *
+     * @var string
+     */
+    private $startTime;
+
+    /**
+     * The datetime of the end of the current call in UTC and ISO 8601.
+     *
+     * @var string
+     */
+    private $endTime;
+
+    /**
+     * Execution time in milliseconds spent by the origin service.
+     *
+     * @var int
+     */
+    private $duration;
 
     /**
      * The address of the Gateway serving the HTTP request.
@@ -81,6 +102,9 @@ class TransportMeta
      * @param string $version
      * @param string $id
      * @param string $datetime
+     * @param string $startTime
+     * @param string $endTime
+     * @param int $duration
      * @param string $gateway
      * @param array $origin
      * @param int $level
@@ -91,6 +115,9 @@ class TransportMeta
         $version,
         $id,
         $datetime,
+        $startTime,
+        $endTime,
+        $duration,
         $gateway,
         array $origin,
         $level,
@@ -100,6 +127,9 @@ class TransportMeta
         $this->version = $version;
         $this->id = $id;
         $this->datetime = $datetime;
+        $this->startTime = $startTime;
+        $this->endTime = $endTime;
+        $this->duration = $duration;
         $this->gateway = $gateway;
         $this->origin = $origin;
         $this->level = $level;
@@ -129,6 +159,30 @@ class TransportMeta
     public function getDatetime()
     {
         return $this->datetime;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStartTime(): string
+    {
+        return $this->startTime;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEndTime(): string
+    {
+        return $this->endTime;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDuration(): int
+    {
+        return $this->duration;
     }
 
     /**

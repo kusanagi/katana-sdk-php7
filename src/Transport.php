@@ -40,7 +40,7 @@ interface Transport
      *
      * @return array
      */
-    public function getOrigin(): array;
+    public function getOriginService(): array;
 
     /**
      * Get a custom userland property

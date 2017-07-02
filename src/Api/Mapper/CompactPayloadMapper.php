@@ -25,6 +25,7 @@ use Katana\Sdk\Api\RequestApi;
 use Katana\Sdk\Api\ResponseApi;
 use Katana\Sdk\Api\ServiceCall;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Mapper\CompactTransportMapper;
 
@@ -103,7 +104,7 @@ class CompactPayloadMapper implements PayloadMapperInterface
         ];
 
         if ($action->hasReturn()) {
-            $response['cr']['r']['R'] = $action->getReturn();
+            $response['cr']['r']['rv'] = $action->getReturn();
         }
 
         return $this->writeTransport($action->getTransport(), $response);
@@ -250,6 +251,19 @@ class CompactPayloadMapper implements PayloadMapperInterface
     public function getClientAddress(array $raw)
     {
         return $raw['c']['a']['m']['c'];
+    }
+
+    /**
+     * @param array $raw
+     * @return string
+     */
+    public function getReturnValue(array $raw)
+    {
+        if (isset($raw['c']['a']['rv'])) {
+            return new ReturnValue($raw['c']['a']['rv'], true);
+        } else {
+            return new ReturnValue();
+        }
     }
 
     /**

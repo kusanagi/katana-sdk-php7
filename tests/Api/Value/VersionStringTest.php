@@ -62,8 +62,8 @@ class VersionStringTest extends TestCase
         $this->assertTrue($version->match('1.1.0'));
         $this->assertTrue($version->match('1.1.5'));
         $this->assertTrue($version->match('1.1.32b'));
+        $this->assertTrue($version->match('1.1.0-rc.1'));
         $this->assertFalse($version->match('0.1.5a'));
-        $this->assertFalse($version->match('1.1.0-rc.1'));
     }
 
     public function testAdjacentWildcards()

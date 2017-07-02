@@ -51,7 +51,9 @@ class VersionString
      */
     public function match($version)
     {
-        $regex = preg_replace('/\*+/', '[^*.]+', $this->version);
+        $regex = str_replace('.', '\.', $this->version);
+        $regex = preg_replace('/\*+/', '[^*.]+', $regex);
+        $regex = preg_replace('/\[\^\*\.\]\+$/', '.+', $regex);
 
         return (bool) preg_match("/^$regex$/", $version);
     }

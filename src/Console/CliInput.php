@@ -108,7 +108,7 @@ class CliInput
             'debug' => new CliOption('D', 'debug', CliOption::VALUE_NONE),
             'var' => new CliOption('V', 'var', CliOption::VALUE_MULTIPLE),
             'disable-compact-names' => new CliOption('d', 'disable-compact-names', CliOption::VALUE_NONE),
-            'callback' => new CliOption('C', 'callback', CliOption::VALUE_SINGLE),
+            'action' => new CliOption('a', 'action', CliOption::VALUE_SINGLE),
             'quiet' => new CliOption('q', 'quiet', CliOption::VALUE_NONE),
         ];
 
@@ -131,7 +131,6 @@ class CliInput
             return $option->parse($options);
         }, $definition);
 
-        print_r($optionValues);
         return new self(
             $optionValues['component'],
             $optionValues['name'],
@@ -141,7 +140,7 @@ class CliInput
             $optionValues['debug'],
             $optionValues['var'],
             $optionValues['disable-compact-names'] ? 'extended' : 'compact',
-            $optionValues['callback'],
+            $optionValues['action'],
             $optionValues['quiet']
         );
     }
@@ -156,7 +155,7 @@ class CliInput
      * @param bool $debug
      * @param array $variables
      * @param string $mapping
-     * @param string $callback
+     * @param string $action
      * @param bool $quiet
      * @throws ConsoleException
      */
@@ -169,7 +168,7 @@ class CliInput
         $debug = false,
         array $variables = [],
         $mapping = 'compact',
-        $callback = '',
+        $action = '',
         $quiet = false
     ) {
         $this->component = $component;
@@ -185,12 +184,8 @@ class CliInput
             throw new ConsoleException("Invalid mapping $mapping");
         }
         $this->mapping = $mapping;
-        if ($callback) {
-            list($action, $input) = explode(':', $callback);
-            if (!file_exists($input)) {
-                throw new ConsoleException("Callback file not found: $input");
-            }
-            $this->input = file_get_contents($input);
+        if ($action) {
+            $this->input = file_get_contents('php://stdin');
             $this->action = $action;
         }
         $this->quiet = $quiet;

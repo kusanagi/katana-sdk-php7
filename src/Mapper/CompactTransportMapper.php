@@ -114,6 +114,9 @@ class CompactTransportMapper
             $rawMeta['v'],
             $rawMeta['i'],
             $rawMeta['d'],
+            $rawMeta['s'] ?? '',
+            $rawMeta['e'] ?? '',
+            $rawMeta['D'] ?? 0,
             $rawMeta['g'],
             $rawMeta['o'],
             $rawMeta['l'],
@@ -132,6 +135,9 @@ class CompactTransportMapper
             'v' => $meta->getVersion(),
             'i' => $meta->getId(),
             'd' => $meta->getDatetime(),
+            's' => $meta->getStartTime(),
+            'e' => $meta->getEndTime(),
+            'D' => $meta->getDuration(),
             'g' => $meta->getGateway(),
             'o' => $meta->getOrigin(),
             'l' => $meta->getLevel(),
@@ -357,6 +363,7 @@ class CompactTransportMapper
                         $callData['n'],
                         new VersionString($callData['v']),
                         $callData['a'],
+                        $callData['D'] ?? 0,
                         isset($callData['p'])? array_map([$this, 'getParam'], $callData['p']) : []
                     );
                 }, $versionCalls);
@@ -378,6 +385,7 @@ class CompactTransportMapper
                 'n' => $call->getService(),
                 'v' => $call->getVersion(),
                 'a' => $call->getAction(),
+                'D' => $call->getDuration(),
                 'C' => $call->getCaller(),
             ];
 
@@ -607,6 +615,7 @@ class CompactTransportMapper
                         $vCalls['n'],
                         new VersionString($vCalls['v']),
                         $vCalls['a'],
+                        $vCalls['D'] ?? 0,
                         $vCalls['t'],
                         isset($vCalls['p'])? array_map([$this, 'getParam'], $vCalls['p']) : []
                     );
@@ -617,6 +626,7 @@ class CompactTransportMapper
                         $vCalls['n'],
                         new VersionString($vCalls['v']),
                         $vCalls['a'],
+                        $vCalls['D'] ?? 0,
                         isset($vCalls['p'])? array_map([$this, 'getParam'], $vCalls['p']) : []
                     );
                 }
@@ -644,20 +654,22 @@ class CompactTransportMapper
         foreach ($mergeData['e'] as $address => $aErrors) {
             foreach ($aErrors as $service => $sErrors) {
                 foreach ($sErrors as $version => $vErrors) {
-                    $transport->addError(new Error(
-                        $address,
-                        $service,
-                        $version,
-                        $vErrors['m'],
-                        $vErrors['c'],
-                        $vErrors['s']
-                    ));
+                    foreach ($vErrors as $error) {
+                        $transport->addError(new Error(
+                            $address,
+                            $service,
+                            $version,
+                            $error['m'],
+                            $error['c'],
+                            $error['s']
+                        ));
+                    }
                 }
             }
         }
 
         // Merge Body
-        if (!$transport->hasBody()) {
+        if (!$transport->hasBody() && $mergeData['b']) {
             $transport->setBody(new File(
                 'body',
                 $mergeData['b']['p'],

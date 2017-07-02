@@ -50,13 +50,13 @@ interface Action extends ApiInterface
 
     /**
      * @param string $name
-     * @param string $value
+     * @param mixed $value
      * @param string $type
      * @return Param
      */
     public function newParam(
         string $name,
-        string $value = '',
+        $value = '',
         string $type = Param::TYPE_STRING
     ): Param;
 
@@ -168,7 +168,7 @@ interface Action extends ApiInterface
      * @param Param[] $params
      * @param File[] $files
      * @param int $timeout
-     * @return Action
+     * @return mixed
      */
     public function call(
         string $service,
@@ -177,7 +177,7 @@ interface Action extends ApiInterface
         array $params = [],
         array $files = [],
         int $timeout = 1000
-    ): Action;
+    );
 
     /**
      * @param string $service

@@ -155,7 +155,7 @@ abstract class Component
      */
     public function setResource(string $name, callable $resource): bool
     {
-        $resource = $resource();
+        $resource = $resource($this);
         if (!$resource) {
             $msg = "Set resource $name failed";
             $this->logger->error($msg);
