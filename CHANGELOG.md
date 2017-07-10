@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.1.6] - 2017-07-10
 ## Fixed
 - Fix meta byte for communicating calls
+
+## Added
 - Add `Api:hasVariable()`
 
 ## [1.1.5] - 2017-07-02
