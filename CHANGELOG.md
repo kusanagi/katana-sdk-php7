@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-##Upcoming
+## [1.1.6] - 2017-07-10
 ## Fixed
 - Fix meta byte for communicating calls
 - Add `Api:hasVariable()`
