@@ -607,30 +607,32 @@ class CompactTransportMapper
         // Merge calls
         foreach ($mergeData['C'] as $service => $sCalls) {
             foreach ($sCalls as $version => $vCalls) {
-                if (isset($vCalls['g'])) {
-                    $call = new RemoteCall(
-                        new ServiceOrigin($service, $version),
-                        $vCalls['C'],
-                        $vCalls['g'],
-                        $vCalls['n'],
-                        new VersionString($vCalls['v']),
-                        $vCalls['a'],
-                        $vCalls['D'] ?? 0,
-                        $vCalls['t'],
-                        isset($vCalls['p'])? array_map([$this, 'getParam'], $vCalls['p']) : []
-                    );
-                } else {
-                    $call = new DeferCall(
-                        new ServiceOrigin($service, $version),
-                        $vCalls['C'],
-                        $vCalls['n'],
-                        new VersionString($vCalls['v']),
-                        $vCalls['a'],
-                        $vCalls['D'] ?? 0,
-                        isset($vCalls['p'])? array_map([$this, 'getParam'], $vCalls['p']) : []
-                    );
+                foreach ($vCalls as $vCall) {
+                    if (isset($vCall['g'])) {
+                        $call = new RemoteCall(
+                            new ServiceOrigin($service, $version),
+                            $vCall['C'],
+                            $vCall['g'],
+                            $vCall['n'],
+                            new VersionString($vCall['v']),
+                            $vCall['a'],
+                            $vCall['D'] ?? 0,
+                            $vCall['t'],
+                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
+                        );
+                    } else {
+                        $call = new DeferCall(
+                            new ServiceOrigin($service, $version),
+                            $vCall['C'],
+                            $vCall['n'],
+                            new VersionString($vCall['v']),
+                            $vCall['a'],
+                            $vCall['D'] ?? 0,
+                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
+                        );
+                    }
+                    $transport->addCall($call);
                 }
-                $transport->addCall($call);
             }
         }
 

@@ -73,7 +73,8 @@ class ZeroMqMultipartResponder implements ResponderInterface
         $payload = $this->serializer->serialize($message);
 
         $controlString = '';
-        if ($action->getTransport()->hasCalls()) {
+        $transportCalls = $action->getTransport()->getCalls()->getArray($action->getName());
+        if (isset($transportCalls[$action->getVersion()])) {
             $controlString .= "\x01";
         }
 
