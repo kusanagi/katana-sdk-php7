@@ -72,7 +72,7 @@ class TransportReader implements TransportInterface
      */
     public function getProperty(string $name, string $default = ''): string
     {
-        return $this->transport->getMeta()->getProperty($name) ?: $default;
+        return $this->transport->getMeta()->getProperty($name, $default);
     }
 
     /**
