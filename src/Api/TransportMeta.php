@@ -216,7 +216,7 @@ class TransportMeta
      */
     public function getProperty(string $name, string $default = ''): string
     {
-        return $this->properties[$name] ?: $default;
+        return $this->properties[$name] ?? $default;
     }
 
     /**
