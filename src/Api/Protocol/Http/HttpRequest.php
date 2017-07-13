@@ -55,6 +55,11 @@ class HttpRequest
     private $headers = [];
 
     /**
+     * @var array
+     */
+    private $headerKeys = [];
+
+    /**
      * @var string
      */
     private $body = '';
@@ -89,7 +94,11 @@ class HttpRequest
         $this->url = $url;
         $this->query = $query;
         $this->postData = $postData;
-        $this->headers = $headers;
+        $this->headers = array_combine(
+            array_map('strtoupper', array_keys($headers)),
+            array_values($headers)
+        );
+        $this->headerKeys = array_keys($headers);
         $this->body = $body;
         $this->files = $files;
     }
@@ -258,9 +267,9 @@ class HttpRequest
      * @param string $name
      * @return bool
      */
-    public function hasHeader($name)
+    public function hasHeader(string $name): bool
     {
-        return isset($this->headers[$name]);
+        return isset($this->headers[strtoupper($name)]);
     }
 
     /**
@@ -268,17 +277,50 @@ class HttpRequest
      * @param string $default
      * @return string
      */
-    public function getHeader($name, $default = '')
+    public function getHeader(string $name, string $default = ''): string
     {
-        return $this->hasHeader($name)? $this->headers[$name] : $default;
+        return $this->headers[strtoupper($name)][0] ?? $default;
+    }
+
+    /**
+     * @param string $name
+     * @param array $default
+     * @return array
+     */
+    public function getHeaderArray(string $name, array $default = []): array
+    {
+        return $this->headers[strtoupper($name)] ?? $default;
+    }
+
+    /**
+     * @param array $arr
+     * @return mixed
+     */
+    private function getFirst(array $arr)
+    {
+        return $arr[0];
     }
 
     /**
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
-        return $this->headers;
+        return array_combine(
+            $this->headerKeys,
+            array_values(array_map([$this, 'getFirst'], $this->headers))
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getHeadersArray(): array
+    {
+        return array_combine(
+            $this->headerKeys,
+            array_values($this->headers)
+        );
     }
 
     /**
