@@ -43,6 +43,14 @@ interface Transport
     public function getOriginService(): array;
 
     /**
+     * Return the execution time in milliseconds that was spent by the origin
+     * of the request.
+     *
+     * @return int
+     */
+    public function getOriginDuration(): int;
+
+    /**
      * Get a custom userland property
      *
      * The default value will be returned if the property does not exist
