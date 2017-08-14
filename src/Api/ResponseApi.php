@@ -54,11 +54,6 @@ class ResponseApi extends Api implements Response
     private $return;
 
     /**
-     * @var array
-     */
-    private $attributes = [];
-
-    /**
      * Response constructor.
      * @param KatanaLogger $logger
      * @param Component $component
@@ -74,7 +69,6 @@ class ResponseApi extends Api implements Response
      * @param Transport $transport
      * @param PayloadMeta $payloadMeta
      * @param ReturnValue $return
-     * @param array $attributes
      */
     public function __construct(
         KatanaLogger $logger,
@@ -90,8 +84,7 @@ class ResponseApi extends Api implements Response
         HttpResponse $response,
         Transport $transport,
         PayloadMeta $payloadMeta,
-        ReturnValue $return,
-        array $attributes = []
+        ReturnValue $return
     ) {
         parent::__construct(
             $logger,
@@ -109,7 +102,6 @@ class ResponseApi extends Api implements Response
         $this->transport = $transport;
         $this->payloadMeta = $payloadMeta;
         $this->return = $return;
-        $this->attributes = $attributes;
     }
 
     /**
@@ -186,7 +178,7 @@ class ResponseApi extends Api implements Response
      */
     public function getRequestAttribute(string $name, string $default = ''): string
     {
-        return $this->attributes[$name] ?? $default;
+        return $this->payloadMeta->getAttribute($name, $default);
     }
 
     /**
@@ -194,6 +186,6 @@ class ResponseApi extends Api implements Response
      */
     public function getRequestAttributes(): array
     {
-        return $this->attributes;
+        return $this->payloadMeta->getAttributes();
     }
 }
