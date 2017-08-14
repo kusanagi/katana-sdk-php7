@@ -55,9 +55,8 @@ class MiddlewareApiFactory extends ApiFactory
                 $input->isDebug(),
                 $this->mapper->getHttpRequest($data),
                 $this->mapper->getServiceCall($data),
-                $this->mapper->getGatewayProtocol($data),
-                $this->mapper->getGatewayAddress($data),
-                $this->mapper->getClientAddress($data)
+                $this->mapper->getPayloadMeta($data),
+                $this->mapper->getRequestAttributes($data)
             );
 
         } elseif($action === 'response') {
@@ -74,8 +73,7 @@ class MiddlewareApiFactory extends ApiFactory
                 $this->mapper->getHttpRequest($data),
                 $this->mapper->getHttpResponse($data),
                 $this->mapper->getTransport($data),
-                $this->mapper->getGatewayProtocol($data),
-                $this->mapper->getGatewayAddress($data),
+                $this->mapper->getPayloadMeta($data),
                 $this->mapper->getReturnValue($data)
             );
         }

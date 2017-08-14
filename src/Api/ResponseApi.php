@@ -17,6 +17,7 @@ namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Api\Protocol\Http\HttpRequest;
 use Katana\Sdk\Api\Protocol\Http\HttpResponse;
+use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Exception\InvalidValueException;
@@ -43,19 +44,19 @@ class ResponseApi extends Api implements Response
     private $transport;
 
     /**
-     * @var string
+     * @var PayloadMeta
      */
-    private $protocol;
-
-    /**
-     * @var string
-     */
-    private $gatewayAddress;
+    private $payloadMeta;
 
     /**
      * @var ReturnValue
      */
     private $return;
+
+    /**
+     * @var array
+     */
+    private $attributes = [];
 
     /**
      * Response constructor.
@@ -71,9 +72,9 @@ class ResponseApi extends Api implements Response
      * @param HttpRequest $request
      * @param HttpResponse $response
      * @param Transport $transport
-     * @param string $protocol
-     * @param string $gatewayAddress,
+     * @param PayloadMeta $payloadMeta
      * @param ReturnValue $return
+     * @param array $attributes
      */
     public function __construct(
         KatanaLogger $logger,
@@ -88,9 +89,9 @@ class ResponseApi extends Api implements Response
         HttpRequest $request,
         HttpResponse $response,
         Transport $transport,
-        $protocol,
-        $gatewayAddress,
-        ReturnValue $return
+        PayloadMeta $payloadMeta,
+        ReturnValue $return,
+        array $attributes = []
     ) {
         parent::__construct(
             $logger,
@@ -106,9 +107,9 @@ class ResponseApi extends Api implements Response
         $this->request = $request;
         $this->response = $response;
         $this->transport = $transport;
-        $this->protocol = $protocol;
-        $this->gatewayAddress = $gatewayAddress;
+        $this->payloadMeta = $payloadMeta;
         $this->return = $return;
+        $this->attributes = $attributes;
     }
 
     /**
@@ -140,7 +141,7 @@ class ResponseApi extends Api implements Response
      */
     public function getGatewayProtocol(): string
     {
-        return $this->protocol;
+        return $this->payloadMeta->getGatewayProtocol();
     }
 
     /**
@@ -148,7 +149,7 @@ class ResponseApi extends Api implements Response
      */
     public function getGatewayAddress(): string
     {
-        return $this->gatewayAddress;
+        return $this->payloadMeta->getGatewayAddress();
     }
 
     /**
@@ -176,5 +177,23 @@ class ResponseApi extends Api implements Response
                 $action
             ));
         }
+    }
+
+    /**
+     * @param string $name
+     * @param string $default
+     * @return string
+     */
+    public function getRequestAttribute(string $name, string $default = ''): string
+    {
+        return $this->attributes[$name] ?? $default;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRequestAttributes(): array
+    {
+        return $this->attributes;
     }
 }

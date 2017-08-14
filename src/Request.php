@@ -80,4 +80,21 @@ interface Request extends ApiInterface, ParamContainerInterface
      * @return string
      */
     public function getClientAddress(): string;
+
+    /**
+     * @return string
+     */
+    public function getId():string;
+
+    /**
+     * @return string
+     */
+    public function getTimestamp(): string;
+
+    /**
+     * @param string $name
+     * @param string $value
+     * @return Request
+     */
+    public function setAttribute(string $name, string $value): Request;
 }

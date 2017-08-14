@@ -17,6 +17,7 @@ namespace Katana\Sdk\Api\Mapper;
 
 use Katana\Sdk\Api\ActionApi;
 use Katana\Sdk\Api\DeferCall;
+use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Api\Error;
@@ -239,29 +240,18 @@ class ExtendedPayloadMapper implements PayloadMapperInterface
 
     /**
      * @param array $raw
-     * @return string
+     * @return PayloadMeta
      */
-    public function getGatewayProtocol(array $raw)
+    public function getPayloadMeta(array $raw): PayloadMeta
     {
-        return $raw['command']['arguments']['meta']['protocol'];
-    }
-
-    /**
-     * @param array $raw
-     * @return string
-     */
-    public function getGatewayAddress(array $raw)
-    {
-        return $raw['command']['arguments']['meta']['gateway'][1];
-    }
-
-    /**
-     * @param array $raw
-     * @return string
-     */
-    public function getClientAddress(array $raw)
-    {
-        return $raw['command']['arguments']['meta']['client'];
+        return new PayloadMeta(
+            $raw['command']['arguments']['meta']['id'],
+            $raw['command']['arguments']['meta']['date'],
+            $raw['command']['arguments']['meta']['protocol'],
+            $raw['command']['arguments']['meta']['gateway'][1],
+            $raw['command']['arguments']['meta']['client'],
+            $raw['command']['arguments']['meta']['arguments'] ?? []
+        );
     }
 
     /**
@@ -332,6 +322,15 @@ class ExtendedPayloadMapper implements PayloadMapperInterface
         ];
 
         return $output;
+    }
+
+    /**
+     * @param array $raw
+     * @return array
+     */
+    public function getRequestAttributes(array $raw): array
+    {
+        return $raw['command']['arguments']['attributes'] ?? [];
     }
 
     /**
