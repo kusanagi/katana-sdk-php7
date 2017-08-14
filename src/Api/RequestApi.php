@@ -18,6 +18,7 @@ namespace Katana\Sdk\Api;
 use Katana\Sdk\Api\Protocol\Http\HttpRequest;
 use Katana\Sdk\Api\Protocol\Http\HttpResponse;
 use Katana\Sdk\Api\Protocol\Http\HttpStatus;
+use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Component\Component;
@@ -40,19 +41,14 @@ class RequestApi extends Api implements Request
     private $call;
 
     /**
-     * @var string
+     * @var PayloadMeta
      */
-    private $protocol;
+    private $payloadMeta;
 
     /**
-     * @var string
+     * @var array
      */
-    private $gatewayAddress;
-
-    /**
-     * @var string
-     */
-    private $client;
+    private $attributes = [];
 
     /**
      * Response constructor.
@@ -67,9 +63,8 @@ class RequestApi extends Api implements Request
      * @param bool $debug
      * @param HttpRequest $httpRequest
      * @param ServiceCall $call
-     * @param string $protocol
-     * @param string $gatewayAddress
-     * @param string $client
+     * @param PayloadMeta $payloadMeta
+     * @param array $attributes
      */
     public function __construct(
         KatanaLogger $logger,
@@ -83,9 +78,8 @@ class RequestApi extends Api implements Request
         bool $debug,
         HttpRequest $httpRequest,
         ServiceCall $call,
-        string $protocol,
-        string $gatewayAddress,
-        string $client
+        PayloadMeta $payloadMeta,
+        array $attributes = []
     ) {
         parent::__construct(
             $logger,
@@ -100,9 +94,8 @@ class RequestApi extends Api implements Request
         );
         $this->httpRequest = $httpRequest;
         $this->call = $call;
-        $this->protocol = $protocol;
-        $this->gatewayAddress = $gatewayAddress;
-        $this->client = $client;
+        $this->payloadMeta = $payloadMeta;
+        $this->attributes = $attributes;
     }
 
     /**
@@ -186,8 +179,7 @@ class RequestApi extends Api implements Request
                 ''
             ),
             Transport::newEmpty(),
-            $this->protocol,
-            $this->gatewayAddress,
+            $this->payloadMeta,
             new ReturnValue()
         );
     }
@@ -211,9 +203,25 @@ class RequestApi extends Api implements Request
     /**
      * @return string
      */
+    public function getId(): string
+    {
+        return $this->payloadMeta->getId();
+    }
+
+    /**
+     * @return string
+     */
+    public function getTimestamp(): string
+    {
+        return $this->payloadMeta->getTimestamp();
+    }
+
+    /**
+     * @return string
+     */
     public function getGatewayProtocol(): string
     {
-        return $this->protocol;
+        return $this->payloadMeta->getGatewayProtocol();
     }
 
     /**
@@ -221,7 +229,7 @@ class RequestApi extends Api implements Request
      */
     public function getGatewayAddress(): string
     {
-        return $this->gatewayAddress;
+        return $this->payloadMeta->getGatewayAddress();
     }
 
     /**
@@ -229,7 +237,7 @@ class RequestApi extends Api implements Request
      */
     public function getClientAddress(): string
     {
-        return $this->client;
+        return $this->payloadMeta->getClientAddress();
     }
 
     /**
@@ -283,4 +291,23 @@ class RequestApi extends Api implements Request
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param string $name
+     * @param string $value
+     * @return Request
+     */
+    public function setAttribute(string $name, string $value): Request
+    {
+        $this->attributes[$name] = $value;
+
+        return $this;
+    }
 }

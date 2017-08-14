@@ -60,4 +60,20 @@ interface Response extends ApiInterface
      * @return mixed
      */
     public function getReturn();
+
+    /**
+     * Get a request attribute or $default if it does not exist.
+     *
+     * @param string $name
+     * @param string $default
+     * @return string
+     */
+    public function getRequestAttribute(string $name, string $default = ''): string;
+
+    /**
+     * Get request attributes.
+     *
+     * @return array
+     */
+    public function getRequestAttributes(): array;
 }
