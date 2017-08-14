@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Upcoming
+## [1.1.9] - 2017-08-14
 ## Added
 - Support for request attributes from katana 1.1.12
 - Accessors for request id and timestamp
