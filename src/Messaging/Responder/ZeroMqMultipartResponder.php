@@ -20,7 +20,9 @@ use Katana\Sdk\Api\Api;
 use Katana\Sdk\Api\Mapper\PayloadWriterInterface;
 use Katana\Sdk\Api\RequestApi;
 use Katana\Sdk\Api\ResponseApi;
+use Katana\Sdk\Exception\ResponderException;
 use Katana\Sdk\Messaging\MessagePackSerializer;
+use MessagePack\Exception\PackingFailedException;
 
 /**
  * Take an Api and respond with a msgpack to ZeroMQ
@@ -117,12 +119,16 @@ class ZeroMqMultipartResponder implements ResponderInterface
      */
     public function sendResponse(Api $api, PayloadWriterInterface $mapper)
     {
-        if ($api instanceof ActionApi) {
-            $this->sendActionResponse($api, $mapper);
-        } elseif ($api instanceof ResponseApi) {
-            $this->sendResponseResponse($api, $mapper);
-        } elseif ($api instanceof RequestApi) {
-            $this->sendRequestResponse($api, $mapper);
+        try {
+            if ($api instanceof ActionApi) {
+                $this->sendActionResponse($api, $mapper);
+            } elseif ($api instanceof ResponseApi) {
+                $this->sendResponseResponse($api, $mapper);
+            } elseif ($api instanceof RequestApi) {
+                $this->sendRequestResponse($api, $mapper);
+            }
+        } catch (PackingFailedException $e) {
+            throw new ResponderException('Could not pack the message', 1, $e);
         }
     }
 
