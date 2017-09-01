@@ -143,6 +143,15 @@ abstract class Api
 
     /**
      * @param string $name
+     * @return bool
+     */
+    public function hasVariable(string $name): bool
+    {
+        return isset($this->variables[$name]);
+    }
+
+    /**
+     * @param string $name
      * @return string
      */
     public function getVariable(string $name): string

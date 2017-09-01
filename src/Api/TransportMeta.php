@@ -211,11 +211,12 @@ class TransportMeta
 
     /**
      * @param string $name
-     * @return mixed
+     * @param string $default
+     * @return mixed|string
      */
-    public function getProperty($name)
+    public function getProperty(string $name, string $default = ''): string
     {
-        return $this->properties[$name];
+        return $this->properties[$name] ?? $default;
     }
 
     /**

@@ -29,6 +29,7 @@ use Katana\Sdk\Api\TransportLinks;
 use Katana\Sdk\Api\TransportMeta;
 use Katana\Sdk\Api\TransportRelations;
 use Katana\Sdk\Api\TransportTransactions;
+use Katana\Sdk\Api\Value\PayloadMeta;
 
 /**
  * Interface for classes that build Api instances from command input
@@ -57,21 +58,9 @@ interface PayloadReaderInterface
 
     /**
      * @param array $raw
-     * @return string
+     * @return PayloadMeta
      */
-    public function getGatewayProtocol(array $raw);
-
-    /**
-     * @param array $raw
-     * @return string
-     */
-    public function getGatewayAddress(array $raw);
-
-    /**
-     * @param array $raw
-     * @return string
-     */
-    public function getClientAddress(array $raw);
+    public function getPayloadMeta(array $raw): PayloadMeta;
 
     /**
      * @param array $raw
@@ -90,4 +79,10 @@ interface PayloadReaderInterface
      * @return ServiceCall
      */
     public function getServiceCall(array $raw);
+
+    /**
+     * @param array $raw
+     * @return array
+     */
+    public function getRequestAttributes(array $raw): array;
 }

@@ -45,6 +45,12 @@ interface ApiInterface
     public function getVariables(): array;
 
     /**
+     * @param string $name
+     * @return string
+     */
+    public function hasVariable(string $name): bool;
+
+    /**
      * @param $name
      * @return string
      */

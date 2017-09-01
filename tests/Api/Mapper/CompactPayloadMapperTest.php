@@ -51,9 +51,12 @@ class CompactPayloadMapperTest extends TestCase
         $this->assertEquals('test-action', $call->getAction());
         $this->assertEquals('1.0.0', $call->getVersion());
 
-        $this->assertEquals('http', $mapper->getGatewayProtocol($command));
-        $this->assertEquals('http://127.0.0.1:80', $mapper->getGatewayAddress($command));
-        $this->assertEquals('205.81.5.62:7681', $mapper->getClientAddress($command));
+        $payloadMeta = $mapper->getPayloadMeta($command);
+        $this->assertEquals('05cb5b6b-dbc2-4e27-86b0-ef1463199c78', $payloadMeta->getId());
+        $this->assertEquals('2016-09-14T22:49:37.703915+00:00', $payloadMeta->getTimestamp());
+        $this->assertEquals('http', $payloadMeta->getGatewayProtocol());
+        $this->assertEquals('http://127.0.0.1:80', $payloadMeta->getGatewayAddress());
+        $this->assertEquals('205.81.5.62:7681', $payloadMeta->getClientAddress());
     }
 
     public function testTransportMapping()

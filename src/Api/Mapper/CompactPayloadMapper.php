@@ -25,6 +25,7 @@ use Katana\Sdk\Api\RequestApi;
 use Katana\Sdk\Api\ResponseApi;
 use Katana\Sdk\Api\ServiceCall;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Mapper\CompactTransportMapper;
@@ -121,6 +122,8 @@ class CompactPayloadMapper implements PayloadMapperInterface
                 'n' => $request->getName(),
             ],
         ];
+
+        $message['cr']['r']['a'] = $request->getAttributes();
 
         return $this->writeServiceCall($request->getServiceCall(), $message);
     }
@@ -228,29 +231,18 @@ class CompactPayloadMapper implements PayloadMapperInterface
 
     /**
      * @param array $raw
-     * @return string
+     * @return PayloadMeta
      */
-    public function getGatewayProtocol(array $raw)
+    public function getPayloadMeta(array $raw): PayloadMeta
     {
-        return $raw['c']['a']['m']['p'];
-    }
-
-    /**
-     * @param array $raw
-     * @return string
-     */
-    public function getGatewayAddress(array $raw)
-    {
-        return $raw['c']['a']['m']['g'][1];
-    }
-
-    /**
-     * @param array $raw
-     * @return string
-     */
-    public function getClientAddress(array $raw)
-    {
-        return $raw['c']['a']['m']['c'];
+        return new PayloadMeta(
+            $raw['c']['a']['m']['i'],
+            $raw['c']['a']['m']['d'],
+            $raw['c']['a']['m']['p'],
+            $raw['c']['a']['m']['g'][1],
+            $raw['c']['a']['m']['c'],
+            $raw['c']['a']['m']['a'] ?? []
+        );
     }
 
     /**
@@ -321,6 +313,15 @@ class CompactPayloadMapper implements PayloadMapperInterface
         ];
 
         return $output;
+    }
+
+    /**
+     * @param array $raw
+     * @return array
+     */
+    public function getRequestAttributes(array $raw): array
+    {
+        return $raw['c']['a']['a'] ?? [];
     }
 
     /**

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.10] - 2017-08-14
+## Fixed
+- Fixed Response accessors for attributes
+
+## [1.1.9] - 2017-08-14
+## Added
+- Support for request attributes from katana 1.1.12
+- Accessors for request id and timestamp
+
+## [1.1.8] - 2017-07-13
+## Added
+- New header methods
+
+## [1.1.7] - 2017-07-12
+## Fixed
+- Fix default property in getProperty()
+
+## [1.1.6] - 2017-07-10
+## Fixed
+- Fix meta byte for communicating calls
+
+## Added
+- Add `Api:hasVariable()`
+
 ## [1.1.5] - 2017-07-02
 ## Fixed
 - Fixed url methods return type when a part is not found
