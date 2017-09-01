@@ -20,6 +20,7 @@ use Katana\Sdk\Api\Api;
 use Katana\Sdk\Api\Factory\ApiFactory;
 use Katana\Sdk\Api\Mapper\PayloadWriterInterface;
 use Katana\Sdk\Console\CliInput;
+use Katana\Sdk\Exception\ResponderException;
 use Katana\Sdk\Logger\KatanaLogger;
 use Katana\Sdk\Messaging\Responder\ResponderInterface;
 use Throwable;
@@ -81,7 +82,16 @@ abstract class AbstractExecutor
         }
 
         if ($response instanceof Api) {
-            $this->responder->sendResponse($response, $this->mapper);
+            try {
+                $this->responder->sendResponse($response, $this->mapper);
+            } catch (ResponderException $e) {
+                $this->sendError($e->getMessage());
+                if ($e->getPrevious()) {
+                    $this->logger->error(
+                        'Packer error: ' . $e->getPrevious()->getMessage()
+                    );
+                }
+            }
 
             return true;
         }
