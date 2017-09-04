@@ -347,7 +347,7 @@ class ExtendedPayloadMapper implements PayloadMapperInterface
         ];
 
         if ($response->getHeaders()) {
-            $output['command_reply']['response']['response']['headers'] = $response->getHeaders();
+            $output['command_reply']['response']['response']['headers'] = $response->getHeadersArray();
         }
 
         return $output;

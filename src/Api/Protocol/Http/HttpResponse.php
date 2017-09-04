@@ -210,6 +210,7 @@ class HttpResponse
     public function setHeader($header, $value)
     {
         $this->headers[$header][] = $value;
+        $this->headerKeys[] = $header;
 
         return $this;
     }
