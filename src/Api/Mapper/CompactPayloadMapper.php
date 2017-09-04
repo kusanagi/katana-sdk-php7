@@ -338,7 +338,7 @@ class CompactPayloadMapper implements PayloadMapperInterface
         ];
 
         if ($response->getHeaders()) {
-            $output['cr']['r']['R']['h'] = $response->getHeaders();
+            $output['cr']['r']['R']['h'] = $response->getHeadersArray();
         }
 
         return $output;
