@@ -43,6 +43,11 @@ class HttpResponse
     private $headers = [];
 
     /**
+     * @var array
+     */
+    private $headerKeys = [];
+
+    /**
      * @param string $version
      * @param HttpStatus $status
      * @param array $headers
@@ -57,7 +62,11 @@ class HttpResponse
         $this->version = $version;
         $this->status = $status;
         $this->body = $body;
-        $this->headers = $headers;
+        $this->headers = array_combine(
+            array_map('strtoupper', array_keys($headers)),
+            array_values($headers)
+        );
+        $this->headerKeys = array_keys($headers);
     }
 
     /**
@@ -137,26 +146,60 @@ class HttpResponse
      * @param string $header
      * @return bool
      */
-    public function hasHeader($header)
+    public function hasHeader($header): bool
     {
         return isset($this->headers[$header]);
     }
 
     /**
      * @param string $header
+     * @param string $default
      * @return string
      */
-    public function getHeader($header)
+    public function getHeader($header, string $default = ''): string
     {
-        return $this->headers[$header];
+        return $this->headers[$header][0] ?? $default;
+    }
+
+    /**
+     * @param string $header
+     * @param array $default
+     * @return array
+     */
+    public function getHeaderArray($header, array $default = []): array
+    {
+        return $this->headers[$header] ?? $default;
+    }
+
+    /**
+     * @param array $arr
+     * @return mixed
+     */
+    private function getFirst(array $arr)
+    {
+        return $arr[0];
     }
 
     /**
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
-        return $this->headers;
+        return array_combine(
+            $this->headerKeys,
+            array_values(array_map([$this, 'getFirst'], $this->headers))
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getHeadersArray(): array
+    {
+        return array_combine(
+            $this->headerKeys,
+            array_values($this->headers)
+        );
     }
 
     /**
@@ -166,7 +209,7 @@ class HttpResponse
      */
     public function setHeader($header, $value)
     {
-        $this->headers[$header] = $value;
+        $this->headers[$header][] = $value;
 
         return $this;
     }
