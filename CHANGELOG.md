@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+## [1.2.2] - 2017-09-07
+## Fixed
+- Skip merge of 0 duration calls
+
 ## [1.2.1] - 2017-09-06
 ## Fixed
 - Treat headers as an array of values on response
