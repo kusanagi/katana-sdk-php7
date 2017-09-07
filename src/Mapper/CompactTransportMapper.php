@@ -608,6 +608,10 @@ class CompactTransportMapper
         foreach ($mergeData['C'] as $service => $sCalls) {
             foreach ($sCalls as $version => $vCalls) {
                 foreach ($vCalls as $vCall) {
+                    if (!isset($vCall['D']) || $vCall['D'] === 0) {
+                        continue;
+                    }
+
                     if (isset($vCall['g'])) {
                         $call = new RemoteCall(
                             new ServiceOrigin($service, $version),
