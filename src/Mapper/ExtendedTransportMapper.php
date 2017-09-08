@@ -32,7 +32,7 @@ use Katana\Sdk\Api\TransportRelations;
 use Katana\Sdk\Api\TransportTransactions;
 use Katana\Sdk\Api\Value\VersionString;
 
-class ExtendedTransportMapper
+class ExtendedTransportMapper implements TransportWriterInterface, TransportReaderInterface
 {
     /**
      * @param array $param

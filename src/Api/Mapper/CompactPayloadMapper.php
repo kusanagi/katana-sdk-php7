@@ -29,11 +29,12 @@ use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Mapper\CompactTransportMapper;
+use Katana\Sdk\Mapper\TransportWriterInterface;
 
 class CompactPayloadMapper implements PayloadMapperInterface
 {
     /**
-     * @var CompactTransportMapper
+     * @var TransportWriterInterface
      */
     private $transportMapper;
 

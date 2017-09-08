@@ -18,7 +18,9 @@ namespace Katana\Sdk\Api\Factory;
 use Katana\Sdk\Api\ActionApi;
 use Katana\Sdk\Api\TypeCatalog;
 use Katana\Sdk\Console\CliInput;
+use Katana\Sdk\Mapper\CompactRuntimeCallMapper;
 use Katana\Sdk\Mapper\CompactTransportMapper;
+use Katana\Sdk\Mapper\ExtendedTransportMapper;
 use Katana\Sdk\Messaging\MessagePackSerializer;
 use Katana\Sdk\Messaging\RuntimeCaller\ZeroMQRuntimeCaller;
 use Katana\Sdk\Schema\Mapping;
@@ -50,10 +52,19 @@ class ServiceApiFactory extends ApiFactory
         $socket = new ZMQSocket($context, ZMQ::SOCKET_REQ);
         $socket->setSockOpt(ZMQ::SOCKOPT_LINGER, 0);
 
+        if ($input->getMapping() === 'compact') {
+            $transportMapper = new CompactTransportMapper();
+            $runtimeCallMapper = new CompactRuntimeCallMapper($transportMapper);
+        } else {
+            $transportMapper = new ExtendedTransportMapper();
+            $runtimeCallMapper = new ExtendedTransportMapper($transportMapper);
+        }
+
         $caller = new ZeroMQRuntimeCaller(
             new MessagePackSerializer(),
             new CompactTransportMapper(),
-            $socket
+            $socket,
+            $runtimeCallMapper
         );
 
         return new ActionApi(

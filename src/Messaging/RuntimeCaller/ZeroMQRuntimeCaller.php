@@ -21,6 +21,8 @@ use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Value\ActionTarget;
 use Katana\Sdk\Exception\RuntimeCallException;
 use Katana\Sdk\Mapper\CompactTransportMapper;
+use Katana\Sdk\Mapper\RuntimeCallWriterInterface;
+use Katana\Sdk\Mapper\TransportWriterInterface;
 use Katana\Sdk\Messaging\MessagePackSerializer;
 use ZMQ;
 use ZMQPoll;
@@ -39,9 +41,14 @@ class ZeroMQRuntimeCaller
     private $serializer;
 
     /**
-     * @var CompactTransportMapper
+     * @var TransportWriterInterface
      */
     private $mapper;
+
+    /**
+     * @var RuntimeCallWriterInterface
+     */
+    private $runtimeCallWriter;
 
     /**
      * @param Param $param
@@ -58,17 +65,20 @@ class ZeroMQRuntimeCaller
 
     /**
      * @param MessagePackSerializer $serializer
-     * @param CompactTransportMapper $mapper
+     * @param TransportWriterInterface $mapper
      * @param $socket
+     * @param RuntimeCallWriterInterface $runtimeCallWriter
      */
     public function __construct(
         MessagePackSerializer $serializer,
-        CompactTransportMapper $mapper,
-        $socket
+        TransportWriterInterface $mapper,
+        $socket,
+        RuntimeCallWriterInterface $runtimeCallWriter
     ) {
         $this->serializer = $serializer;
         $this->mapper = $mapper;
         $this->socket = $socket;
+        $this->runtimeCallWriter = $runtimeCallWriter;
     }
 
     /**
@@ -91,25 +101,13 @@ class ZeroMQRuntimeCaller
         array $files = [],
         $timeout = 1000
     ) {
-        $message = [
-            'c' => [
-                'n' => 'runtime-call',
-                'a' => [
-                    'a' => $action,
-                    'c' => [
-                        $target->getService(),
-                        $target->getVersion()->getVersion(),
-                        $target->getAction()
-                    ],
-                    'T' => $this->mapper->writeTransport($transport),
-                    'p' => array_map([$this, 'writeParam'], $params),
-                    'f' => $files,
-                ],
-            ],
-            'm' => [
-                's' => 'service',
-            ],
-        ];
+        $message = $this->runtimeCallWriter->writeRuntimeCall(
+            $action,
+            $transport,
+            $target,
+            $params,
+            $files
+        );
 
         $payload = $this->serializer->serialize($message);
 
