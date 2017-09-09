@@ -23,12 +23,12 @@ namespace Katana\Sdk\Api;
 class TransportCalls
 {
     /**
-     * @var DeferCall[]
+     * @var AbstractCall[]
      */
     private $calls = [];
 
     /**
-     * @param DeferCall[] $calls
+     * @param AbstractCall[] $calls
      */
     public function __construct(array $calls = [])
     {
@@ -36,10 +36,10 @@ class TransportCalls
     }
 
     /**
-     * @param DeferCall $call
+     * @param AbstractCall $call
      * @return bool
      */
-    public function add(DeferCall $call)
+    public function add(AbstractCall $call)
     {
         $this->calls[] = $call;
 
@@ -56,7 +56,7 @@ class TransportCalls
 
     /**
      * @param string $service
-     * @return DeferCall[]
+     * @return AbstractCall[]
      */
     public function get($service = '')
     {

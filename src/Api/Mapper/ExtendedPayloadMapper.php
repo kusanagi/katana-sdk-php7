@@ -16,30 +16,18 @@
 namespace Katana\Sdk\Api\Mapper;
 
 use Katana\Sdk\Api\ActionApi;
-use Katana\Sdk\Api\DeferCall;
-use Katana\Sdk\Api\Value\PayloadMeta;
-use Katana\Sdk\Api\Value\ReturnValue;
-use Katana\Sdk\Api\Value\VersionString;
-use Katana\Sdk\Api\Error;
 use Katana\Sdk\Api\File;
+use Katana\Sdk\Api\Param;
 use Katana\Sdk\Api\Protocol\Http\HttpRequest;
 use Katana\Sdk\Api\Protocol\Http\HttpResponse;
 use Katana\Sdk\Api\Protocol\Http\HttpStatus;
-use Katana\Sdk\Api\Param;
 use Katana\Sdk\Api\RequestApi;
 use Katana\Sdk\Api\ResponseApi;
 use Katana\Sdk\Api\ServiceCall;
-use Katana\Sdk\Api\ServiceOrigin;
-use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
-use Katana\Sdk\Api\TransportCalls;
-use Katana\Sdk\Api\TransportData;
-use Katana\Sdk\Api\TransportErrors;
-use Katana\Sdk\Api\TransportFiles;
-use Katana\Sdk\Api\TransportLinks;
-use Katana\Sdk\Api\TransportMeta;
-use Katana\Sdk\Api\TransportRelations;
-use Katana\Sdk\Api\TransportTransactions;
+use Katana\Sdk\Api\Value\PayloadMeta;
+use Katana\Sdk\Api\Value\ReturnValue;
+use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Mapper\ExtendedTransportMapper;
 
 class ExtendedPayloadMapper implements PayloadMapperInterface

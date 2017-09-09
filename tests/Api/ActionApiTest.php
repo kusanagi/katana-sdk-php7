@@ -16,7 +16,7 @@
 namespace Katana\Sdk\Tests\Api;
 
 use Katana\Sdk\Api\ActionApi;
-use Katana\Sdk\Api\DeferCall;
+use Katana\Sdk\Api\AbstractCall;
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\TransportMeta;
@@ -164,7 +164,7 @@ class ActionApiTest extends TestCase
         $this->service->getAddress()->willReturn('1.1.1.1:11');
         $this->service->getActionSchema(Argument::any())->willReturn($action->reveal());
 
-        $this->transport->addCall(Argument::type(DeferCall::class))->shouldBeCalled();
+        $this->transport->addCall(Argument::type(AbstractCall::class))->shouldBeCalled();
 
         /** @var File $file */
         $file = $this->prophesize(File::class);

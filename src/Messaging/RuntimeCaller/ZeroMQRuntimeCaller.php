@@ -15,10 +15,14 @@
 
 namespace Katana\Sdk\Messaging\RuntimeCaller;
 
+use ATimer\Timer;
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Param;
+use Katana\Sdk\Api\RuntimeCall;
+use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Value\ActionTarget;
+use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Exception\RuntimeCallException;
 use Katana\Sdk\Mapper\CompactTransportMapper;
 use Katana\Sdk\Mapper\RuntimeCallWriterInterface;
@@ -51,6 +55,11 @@ class ZeroMQRuntimeCaller
     private $runtimeCallWriter;
 
     /**
+     * @var Timer
+     */
+    private $timer;
+
+    /**
      * @param Param $param
      * @return array
      */
@@ -68,20 +77,25 @@ class ZeroMQRuntimeCaller
      * @param TransportWriterInterface $mapper
      * @param $socket
      * @param RuntimeCallWriterInterface $runtimeCallWriter
+     * @param Timer $timer
      */
     public function __construct(
         MessagePackSerializer $serializer,
         TransportWriterInterface $mapper,
         $socket,
-        RuntimeCallWriterInterface $runtimeCallWriter
+        RuntimeCallWriterInterface $runtimeCallWriter,
+        Timer $timer
     ) {
         $this->serializer = $serializer;
         $this->mapper = $mapper;
         $this->socket = $socket;
         $this->runtimeCallWriter = $runtimeCallWriter;
+        $this->timer = $timer;
     }
 
     /**
+     * @param string $service
+     * @param string $version
      * @param string $action
      * @param ActionTarget $target
      * @param Transport $transport
@@ -93,13 +107,15 @@ class ZeroMQRuntimeCaller
      * @throws RuntimeCallException
      */
     public function call(
-        $action,
+        string $service,
+        string $version,
+        string $action,
         ActionTarget $target,
         Transport $transport,
-        $address,
+        string $address,
         array $params = [],
         array $files = [],
-        $timeout = 1000
+        int $timeout = 1000
     ) {
         $message = $this->runtimeCallWriter->writeRuntimeCall(
             $action,
@@ -120,7 +136,10 @@ class ZeroMQRuntimeCaller
         $read = $write = array();
         $poll = new ZMQPoll();
         $poll->add($this->socket, ZMQ::POLL_IN);
+
+        $this->timer->start();
         $response = $poll->poll($read, $write, $timeout);
+        $duration = $this->timer->stop() * 1000;
 
         if ($response > 0) {
             $reply = $this->socket->recv();
@@ -131,6 +150,18 @@ class ZeroMQRuntimeCaller
             } else {
                 $return = $response['cr']['r']['rv'];
                 $this->mapper->merge($transport, $response['cr']['r']['T']);
+                $transport->addCall(
+                    new RuntimeCall(
+                        new ServiceOrigin($service, $version),
+                        'action',
+                        $target->getService(),
+                        $target->getVersion(),
+                        $target->getAction(),
+                        $duration,
+                        $params,
+                        $files
+                    )
+                );
             }
 
         } else {

@@ -20,7 +20,7 @@ namespace Katana\Sdk\Api;
  *
  * @package Katana\Sdk\Api
  */
-class DeferCall extends AbstractCall
+class RuntimeCall extends AbstractCall
 {
 
 }

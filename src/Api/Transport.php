@@ -356,10 +356,10 @@ class Transport
     }
 
     /**
-     * @param DeferCall $call
+     * @param AbstractCall $call
      * @return bool
      */
-    public function addCall(DeferCall $call)
+    public function addCall(AbstractCall $call)
     {
         return $this->calls->add($call);
     }

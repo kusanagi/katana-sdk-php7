@@ -15,6 +15,7 @@
 
 namespace Katana\Sdk\Api\Factory;
 
+use ATimer\Timer;
 use Katana\Sdk\Api\ActionApi;
 use Katana\Sdk\Api\TypeCatalog;
 use Katana\Sdk\Console\CliInput;
@@ -64,7 +65,8 @@ class ServiceApiFactory extends ApiFactory
             new MessagePackSerializer(),
             new CompactTransportMapper(),
             $socket,
-            $runtimeCallMapper
+            $runtimeCallMapper,
+            new Timer()
         );
 
         return new ActionApi(
