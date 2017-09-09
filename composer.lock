@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "193c543ddd5b10ed06be5d87424c6c77",
+    "content-hash": "91764934407da02a645deb75032f9430",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -116,6 +116,50 @@
                 "url"
             ],
             "time": "2017-03-20T17:10:46+00:00"
+        },
+        {
+            "name": "jandreasn/a-timer",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jandreasn/a-timer.git",
+                "reference": "8147f6da5767fca759e9ba20135badc47d86f4ba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jandreasn/a-timer/zipball/8147f6da5767fca759e9ba20135badc47d86f4ba",
+                "reference": "8147f6da5767fca759e9ba20135badc47d86f4ba",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ATimer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andreas Nilsson"
+                }
+            ],
+            "description": "A simple timer.",
+            "homepage": "http://github.com/jandreasn/a-timer",
+            "keywords": [
+                "benchmark",
+                "timer",
+                "timing"
+            ],
+            "time": "2015-11-16T20:24:48+00:00"
         },
         {
             "name": "mkraemer/react-pcntl",

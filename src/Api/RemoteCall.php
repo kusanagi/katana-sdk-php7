@@ -17,7 +17,7 @@ namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Api\Value\VersionString;
 
-class RemoteCall extends DeferCall
+class RemoteCall extends AbstractCall
 {
     /**
      * @var string

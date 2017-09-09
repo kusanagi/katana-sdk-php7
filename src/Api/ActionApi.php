@@ -394,6 +394,8 @@ class ActionApi extends Api implements Action
         );
 
         return $this->caller->call(
+            $this->name,
+            $this->version,
             $this->actionName,
             new ActionTarget($service, new VersionString($version), $action),
             $this->transportCopy,
