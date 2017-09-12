@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Register runtime calls in the transport with duration
 ## Changed
 - Refactor and test runtime-call mappers
+## Fixed
+- Fix getting normalized http headers from response
 
 ## [1.2.2] - 2017-09-07
 ## Fixed

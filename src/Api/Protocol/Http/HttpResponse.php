@@ -148,7 +148,7 @@ class HttpResponse
      */
     public function hasHeader($header): bool
     {
-        return isset($this->headers[$header]);
+        return isset($this->headers[strtoupper($header)]);
     }
 
     /**
@@ -158,7 +158,7 @@ class HttpResponse
      */
     public function getHeader($header, string $default = ''): string
     {
-        return $this->headers[$header][0] ?? $default;
+        return $this->headers[strtoupper($header)][0] ?? $default;
     }
 
     /**
@@ -168,7 +168,7 @@ class HttpResponse
      */
     public function getHeaderArray($header, array $default = []): array
     {
-        return $this->headers[$header] ?? $default;
+        return $this->headers[strtoupper($header)] ?? $default;
     }
 
     /**
