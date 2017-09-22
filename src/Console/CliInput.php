@@ -104,6 +104,7 @@ class CliInput
             'name' => new CliOption('n', 'name', CliOption::VALUE_SINGLE),
             'version' => new CliOption('v', 'version', CliOption::VALUE_SINGLE),
             'framework-version' => new CliOption('p', 'framework-version', CliOption::VALUE_SINGLE),
+            'timeout' => new CliOption('T', 'timeout', CliOption::VALUE_SINGLE),
             'socket' => new CliOption('s', 'socket', CliOption::VALUE_SINGLE),
             'debug' => new CliOption('D', 'debug', CliOption::VALUE_NONE),
             'var' => new CliOption('V', 'var', CliOption::VALUE_MULTIPLE),
@@ -176,7 +177,6 @@ class CliInput
         $this->version = $version;
         $this->frameworkVersion = $frameworkVersion;
         $socketVersion = preg_replace('/[^a-z0-9]/i', '-', $version);
-        //var_dump($frameworkVersion);
         $this->socket = $socket ?: "@katana-$component-$name-$socketVersion";
         $this->debug = $debug;
         $this->variables = $variables;
