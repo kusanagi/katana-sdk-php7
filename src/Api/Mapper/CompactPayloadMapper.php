@@ -270,6 +270,10 @@ class CompactPayloadMapper implements PayloadMapperInterface
         $headers = isset($raw['c']['a']['R']['h'])?
             $raw['c']['a']['R']['h'] : [];
 
+        $headers = array_map(function ($header) {
+            return (array) $header;
+        }, $headers);
+
         return new HttpResponse(
             $raw['c']['a']['R']['v'],
             new HttpStatus($statusCode, $statusText),
