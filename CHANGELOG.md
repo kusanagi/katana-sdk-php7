@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.2.4] - 2017-10-02
 ## Added
 - Allow CLI option *timeout* to be passed without effect.
 - Header conversion to deal with certain message formats.
