@@ -529,7 +529,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
     {
         // Merge meta properties and fallbacks
         $newProperties = array_diff_key(
-            $mergeData['m']['p'],
+            $mergeData['m']['p'] ?? [],
             $transport->getMeta()->getProperties()
         );
         foreach ($newProperties as $key => $value) {
@@ -539,12 +539,12 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         $transport->getMeta()->setFallbacks(
             array_merge_recursive(
                 $transport->getMeta()->getFallbacks(),
-                $mergeData['m']['f']
+                $mergeData['m']['f'] ?? []
             )
         );
 
         // Merge data
-        foreach ($mergeData['d'] as $address => $aData) {
+        foreach ($mergeData['d'] ?? [] as $address => $aData) {
             foreach ($aData as $service => $sData) {
                 foreach ($sData as $version => $vData) {
                     foreach ($vData as $action => $data) {
@@ -558,7 +558,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
         // Merge relations
         $relations = $transport->getRelations()->get();
-        foreach ($mergeData['r'] as $address1 => $a1Relations) {
+        foreach ($mergeData['r'] ?? [] as $address1 => $a1Relations) {
             foreach ($a1Relations as $service1 => $s1Relations) {
                 foreach ($s1Relations as $id1 => $i1Relations) {
                     foreach ($i1Relations as $address2 => $a2Relations) {
@@ -594,7 +594,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
         // Merge links
         $links = $transport->getLinks()->get();
-        foreach ($mergeData['l'] as $address => $aLinks) {
+        foreach ($mergeData['l'] ?? [] as $address => $aLinks) {
             foreach ($aLinks as $namespace => $nLinks) {
                 foreach ($nLinks as $name => $link) {
                     if (!isset($links[$address][$namespace][$name])) {
@@ -605,7 +605,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
 
         // Merge calls
-        foreach ($mergeData['C'] as $service => $sCalls) {
+        foreach ($mergeData['C'] ?? [] as $service => $sCalls) {
             foreach ($sCalls as $version => $vCalls) {
                 foreach ($vCalls as $vCall) {
                     if (!isset($vCall['D']) || $vCall['D'] === 0) {
@@ -641,7 +641,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
 
         // Merge Transactions
-        foreach ($mergeData['t'] as $type => $transaction) {
+        foreach ($mergeData['t'] ?? [] as $type => $transaction) {
             $type = [
                 'c' => 'commit',
                 'r' => 'rollback',
@@ -657,7 +657,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
 
         // Merge errors
-        foreach ($mergeData['e'] as $address => $aErrors) {
+        foreach ($mergeData['e'] ?? [] as $address => $aErrors) {
             foreach ($aErrors as $service => $sErrors) {
                 foreach ($sErrors as $version => $vErrors) {
                     foreach ($vErrors as $error) {
@@ -675,7 +675,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
 
         // Merge Body
-        if (!$transport->hasBody() && $mergeData['b']) {
+        if (!$transport->hasBody() && isset($mergeData['b'])) {
             $transport->setBody(new File(
                 'body',
                 $mergeData['b']['p'],
@@ -687,7 +687,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
 
         $files = $transport->getFiles()->getAll();
-        foreach ($mergeData['f'] as $address => $aFiles) {
+        foreach ($mergeData['f'] ?? [] as $address => $aFiles) {
             foreach ($aFiles as $service => $sFiles) {
                 foreach ($sFiles as $version => $vFiles) {
                     foreach ($vFiles as $action => $aFiles) {

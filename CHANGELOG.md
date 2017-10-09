@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## Changed
+- Added default values in transport mapper to avoid notices.
 
 ## [1.2.4] - 2017-10-02
 ## Added
