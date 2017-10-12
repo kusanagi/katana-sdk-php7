@@ -162,12 +162,13 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
             $data = [];
         }
 
+        $files = [];
         foreach ($data as $service => $serviceFiles) {
             foreach ($serviceFiles as $version => $versionFiles) {
                 foreach ($versionFiles as $action => $actionFiles) {
-                    foreach ($actionFiles as $name => $fileData) {
-                        $data[$service][$version][$action][$name] = new File(
-                            $name,
+                    foreach ($actionFiles as $fileData) {
+                        $data[$service][$version][$action][$fileData['name']] = new File(
+                            $fileData['name'],
                             $fileData['path'],
                             $fileData['mime'],
                             $fileData['filename'],
@@ -179,7 +180,7 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
             }
         }
 
-        return new TransportFiles($data);
+        return new TransportFiles($files);
     }
 
     /**
@@ -194,7 +195,8 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
                 foreach ($versionFiles as $action => $actionFiles) {
                     /** @var File $file */
                     foreach ($actionFiles as $name => $file) {
-                        $output['files'][$service][$version][$action][$name] = [
+                        $output['files'][$service][$version][$action][] = [
+                            'name' => $file->getName(),
                             'path' => $file->getPath(),
                             'mime' => $file->getMime(),
                             'filename' => $file->getFilename(),
