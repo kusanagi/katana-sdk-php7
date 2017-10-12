@@ -162,14 +162,15 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             $data = [];
         }
 
+        $files = [];
         foreach ($data as $address => $addressFiles) {
             foreach ($addressFiles as $service => $serviceFiles) {
                 foreach ($serviceFiles as $version => $versionFiles) {
                     foreach ($versionFiles as $action => $actionFiles) {
-                        foreach ($actionFiles as $name => $fileData) {
+                        foreach ($actionFiles as $fileData) {
                             $token = isset($fileData['t']) ? $fileData['t'] : '';
-                            $data[$address][$service][$version][$action][$name] = new File(
-                                $name,
+                            $files[$address][$service][$version][$action][$fileData['n']] = new File(
+                                $fileData['n'],
                                 $fileData['p'],
                                 $fileData['m'],
                                 $fileData['f'],
@@ -182,7 +183,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             }
         }
 
-        return new TransportFiles($data);
+        return new TransportFiles($files);
     }
 
     /**
@@ -198,7 +199,8 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                     foreach ($versionFiles as $action => $actionFiles) {
                         /** @var File $file */
                         foreach ($actionFiles as $name => $file) {
-                            $output['f'][$address][$service][$version][$action][$name] = [
+                            $output['f'][$address][$service][$version][$action][] = [
+                                'n' => $file->getName(),
                                 'p' => $file->getPath(),
                                 'm' => $file->getMime(),
                                 'f' => $file->getFilename(),
@@ -686,13 +688,13 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             ));
         }
 
-        $files = $transport->getFiles()->getAll();
+        $files = $transport->getFiles();
         foreach ($mergeData['f'] ?? [] as $address => $aFiles) {
             foreach ($aFiles as $service => $sFiles) {
                 foreach ($sFiles as $version => $vFiles) {
                     foreach ($vFiles as $action => $aFiles) {
-                        foreach ($aFiles as $name => $file) {
-                            if (isset($files[$address][$service][$version][$action][$name])) {
+                        foreach ($aFiles as $file) {
+                            if ($files->has($address, $service, $version, $action, $file['n'])) {
                                 continue;
                             }
 
@@ -702,7 +704,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                                 new VersionString($version),
                                 $action,
                                 new File(
-                                    $name,
+                                    $file['n'],
                                     $file['p'],
                                     $file['m'],
                                     $file['f'],

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## Changed
+- Adapt transport files for katana 1.2.14 format. Warning!!! BC break.
 
 ## [1.2.5] - 2017-10-10
 ## Changed
