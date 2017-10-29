@@ -21,7 +21,7 @@ use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Exception\InvalidValueException;
-use Katana\Sdk\Logger\KatanaLogger;
+use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Response;
 use Katana\Sdk\Schema\Mapping;
 use Katana\Sdk\Transport as TransportInterface;
@@ -55,7 +55,7 @@ class ResponseApi extends Api implements Response
 
     /**
      * Response constructor.
-     * @param KatanaLogger $logger
+     * @param RequestKatanaLogger $logger
      * @param Component $component
      * @param Mapping $mapping
      * @param string $path
@@ -71,7 +71,7 @@ class ResponseApi extends Api implements Response
      * @param ReturnValue $return
      */
     public function __construct(
-        KatanaLogger $logger,
+        RequestKatanaLogger $logger,
         Component $component,
         Mapping $mapping,
         $path,

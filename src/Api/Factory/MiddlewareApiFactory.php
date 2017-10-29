@@ -42,9 +42,10 @@ class MiddlewareApiFactory extends ApiFactory
         Mapping $mapping
     )
     {
+        $payloadMeta = $this->mapper->getPayloadMeta($data);
         if ($action === 'request') {
             return new RequestApi(
-                $this->logger,
+                $this->logger->getRequestLogger($payloadMeta->getId()),
                 $this->component,
                 $mapping,
                 dirname(realpath($_SERVER['SCRIPT_FILENAME'])),
@@ -55,13 +56,13 @@ class MiddlewareApiFactory extends ApiFactory
                 $input->isDebug(),
                 $this->mapper->getHttpRequest($data),
                 $this->mapper->getServiceCall($data),
-                $this->mapper->getPayloadMeta($data),
+                $payloadMeta,
                 $this->mapper->getRequestAttributes($data)
             );
 
         } elseif($action === 'response') {
             return new ResponseApi(
-                $this->logger,
+                $this->logger->getRequestLogger($payloadMeta->getId()),
                 $this->component,
                 $mapping,
                 dirname(realpath($_SERVER['SCRIPT_FILENAME'])),

@@ -21,6 +21,7 @@ use Katana\Sdk\Api\TypeCatalog;
 use Katana\Sdk\Console\CliInput;
 use Katana\Sdk\Mapper\CompactRuntimeCallMapper;
 use Katana\Sdk\Mapper\CompactTransportMapper;
+use Katana\Sdk\Mapper\ExtendedRuntimeCallMapper;
 use Katana\Sdk\Mapper\ExtendedTransportMapper;
 use Katana\Sdk\Messaging\MessagePackSerializer;
 use Katana\Sdk\Messaging\RuntimeCaller\ZeroMQRuntimeCaller;
@@ -58,7 +59,7 @@ class ServiceApiFactory extends ApiFactory
             $runtimeCallMapper = new CompactRuntimeCallMapper($transportMapper);
         } else {
             $transportMapper = new ExtendedTransportMapper();
-            $runtimeCallMapper = new ExtendedTransportMapper($transportMapper);
+            $runtimeCallMapper = new ExtendedRuntimeCallMapper($transportMapper);
         }
 
         $caller = new ZeroMQRuntimeCaller(
@@ -69,8 +70,9 @@ class ServiceApiFactory extends ApiFactory
             new Timer()
         );
 
+        $transport = $this->mapper->getTransport($data);
         return new ActionApi(
-            $this->logger,
+            $this->logger->getRequestLogger($transport->getMeta()->getId()),
             $this->component,
             $mapping,
             dirname(realpath($_SERVER['SCRIPT_FILENAME'])),
@@ -81,7 +83,7 @@ class ServiceApiFactory extends ApiFactory
             $input->isDebug(),
             $action,
             $caller,
-            $this->mapper->getTransport($data),
+            $transport,
             new TypeCatalog(),
             $this->mapper->getParams($data)
         );

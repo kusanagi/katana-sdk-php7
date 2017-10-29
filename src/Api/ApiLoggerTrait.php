@@ -21,9 +21,9 @@ use Katana\Sdk\Logger\KatanaLogger;
 trait ApiLoggerTrait
 {
     /**
-     * @var KatanaLogger
+     * @return KatanaLogger
      */
-    protected $logger;
+    abstract protected function getLogger(): KatanaLogger;
 
     /**
      * @param mixed $value

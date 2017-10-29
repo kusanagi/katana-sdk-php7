@@ -22,11 +22,11 @@ use Katana\Sdk\Api\Value\PayloadMeta;
 use Katana\Sdk\Api\Value\ReturnValue;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Component\Component;
-use Katana\Sdk\Logger\KatanaLogger;
-use Katana\Sdk\Request;
-use Katana\Sdk\Schema\Mapping;
-use Katana\Sdk\Response;
+use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Param as ParamInterface;
+use Katana\Sdk\Request;
+use Katana\Sdk\Response;
+use Katana\Sdk\Schema\Mapping;
 
 class RequestApi extends Api implements Request
 {
@@ -52,7 +52,7 @@ class RequestApi extends Api implements Request
 
     /**
      * Response constructor.
-     * @param KatanaLogger $logger
+     * @param RequestKatanaLogger $logger
      * @param Component $component
      * @param Mapping $mapping
      * @param string $path
@@ -67,7 +67,7 @@ class RequestApi extends Api implements Request
      * @param array $attributes
      */
     public function __construct(
-        KatanaLogger $logger,
+        RequestKatanaLogger $logger,
         Component $component,
         Mapping $mapping,
         string $path,

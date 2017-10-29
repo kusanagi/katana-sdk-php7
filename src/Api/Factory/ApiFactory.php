@@ -19,7 +19,7 @@ use Katana\Sdk\Api\Api;
 use Katana\Sdk\Api\Mapper\PayloadReaderInterface;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Console\CliInput;
-use Katana\Sdk\Logger\KatanaLogger;
+use Katana\Sdk\Logger\GlobalKatanaLogger;
 use Katana\Sdk\Schema\Mapping;
 
 /**
@@ -41,20 +41,20 @@ abstract class ApiFactory
     protected $mapper;
 
     /**
-     * @var KatanaLogger
+     * @var GlobalKatanaLogger
      */
     protected $logger;
 
     /**
      * @param Component $component
      * @param PayloadReaderInterface $mapper
-     * @param KatanaLogger $logger
+     * @param GlobalKatanaLogger $logger
      * @return ServiceApiFactory
      */
     public static function getServiceFactory(
         Component $component,
         PayloadReaderInterface $mapper,
-        KatanaLogger $logger
+        GlobalKatanaLogger $logger
     ) {
         return new ServiceApiFactory($component, $mapper, $logger);
     }
@@ -62,13 +62,13 @@ abstract class ApiFactory
     /**
      * @param Component $component
      * @param PayloadReaderInterface $mapper
-     * @param KatanaLogger $logger
+     * @param GlobalKatanaLogger $logger
      * @return MiddlewareApiFactory
      */
     public static function getMiddlewareFactory(
         Component $component,
         PayloadReaderInterface $mapper,
-        KatanaLogger $logger
+        GlobalKatanaLogger $logger
     ) {
         return new MiddlewareApiFactory($component, $mapper, $logger);
     }
@@ -76,12 +76,12 @@ abstract class ApiFactory
     /**
      * @param Component $component
      * @param PayloadReaderInterface $mapper
-     * @param KatanaLogger $logger
+     * @param GlobalKatanaLogger $logger
      */
     public function __construct(
         Component $component,
         PayloadReaderInterface $mapper,
-        KatanaLogger $logger
+        GlobalKatanaLogger $logger
     ) {
         $this->component = $component;
         $this->mapper = $mapper;

@@ -23,7 +23,7 @@ use Katana\Sdk\Exception\InvalidValueException;
 use Katana\Sdk\Exception\SchemaException;
 use Katana\Sdk\Exception\TransportException;
 use Katana\Sdk\File as FileInterface;
-use Katana\Sdk\Logger\KatanaLogger;
+use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Messaging\RuntimeCaller\ZeroMQRuntimeCaller;
 use Katana\Sdk\Schema\Mapping;
 
@@ -65,7 +65,7 @@ class ActionApi extends Api implements Action
 
     /**
      * Action constructor.
-     * @param KatanaLogger $logger
+     * @param RequestKatanaLogger $logger
      * @param Component $component
      * @param Mapping $mapping
      * @param string $path
@@ -81,7 +81,7 @@ class ActionApi extends Api implements Action
      * @param Param[] $params
      */
     public function __construct(
-        KatanaLogger $logger,
+        RequestKatanaLogger $logger,
         Component $component,
         Mapping $mapping,
         string $path,

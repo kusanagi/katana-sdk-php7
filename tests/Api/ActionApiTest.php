@@ -15,8 +15,8 @@
 
 namespace Katana\Sdk\Tests\Api;
 
-use Katana\Sdk\Api\ActionApi;
 use Katana\Sdk\Api\AbstractCall;
+use Katana\Sdk\Api\ActionApi;
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\TransportMeta;
@@ -24,6 +24,7 @@ use Katana\Sdk\Api\TypeCatalog;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Exception\InvalidValueException;
 use Katana\Sdk\Logger\KatanaLogger;
+use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Messaging\RuntimeCaller\ZeroMQRuntimeCaller;
 use Katana\Sdk\Schema\ActionSchema;
 use Katana\Sdk\Schema\Mapping;
@@ -55,7 +56,7 @@ class ActionApiTest extends TestCase
 
     public function setUp()
     {
-        $this->logger = $this->prophesize(KatanaLogger::class);
+        $this->logger = $this->prophesize(RequestKatanaLogger::class);
         $this->logger->getLevel()->willReturn(KatanaLogger::LOG_DEBUG);
 
         $this->service = $this->prophesize(ServiceSchema::class);

@@ -24,6 +24,7 @@ use Katana\Sdk\Console\CliInput;
 use Katana\Sdk\Exception\ConsoleException;
 use Katana\Sdk\Executor\AbstractExecutor;
 use Katana\Sdk\Executor\ExecutorFactory;
+use Katana\Sdk\Logger\GlobalKatanaLogger;
 use Katana\Sdk\Logger\KatanaLogger;
 use Katana\Sdk\Schema\Mapping;
 
@@ -35,6 +36,11 @@ use Katana\Sdk\Schema\Mapping;
 abstract class Component
 {
     use ApiLoggerTrait;
+
+    /**
+     * @var GlobalKatanaLogger
+     */
+    protected $logger;
 
     /**
      * @var CliInput
@@ -87,7 +93,7 @@ abstract class Component
         } else {
             $level = KatanaLogger::LOG_INFO;
         }
-        $this->logger = new KatanaLogger($level);
+        $this->logger = new GlobalKatanaLogger($level);
 
         $mapper = $this->input->getMapping() === 'compact'
             ? new CompactPayloadMapper()
@@ -100,6 +106,15 @@ abstract class Component
         $executorFactory = new ExecutorFactory($mapper, $this->logger, $mapping);
         $this->executor = $executorFactory->build($this->input);
     }
+
+    /**
+     * @return KatanaLogger
+     */
+    protected function getLogger(): KatanaLogger
+    {
+        return $this->logger;
+    }
+
 
     /**
      * @param string $name
