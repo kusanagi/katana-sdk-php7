@@ -31,7 +31,7 @@ class RequestKatanaLogger extends KatanaLogger
      * @param string $requestId
      * @param int|null $level
      */
-    public function __construct(string $requestId, ?int $level = null)
+    public function __construct(string $requestId, int $level = null)
     {
         $this->requestId = $requestId;
         parent::__construct($level);

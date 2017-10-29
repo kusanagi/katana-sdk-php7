@@ -44,7 +44,7 @@ abstract class KatanaLogger
     /**
      * @param int $level
      */
-    public function __construct(?int $level = null)
+    public function __construct(int $level = null)
     {
         $this->level = $level ?? $this->level;
     }
