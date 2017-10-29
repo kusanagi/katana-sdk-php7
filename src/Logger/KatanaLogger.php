@@ -20,10 +20,8 @@ namespace Katana\Sdk\Logger;
  *
  * @package Katana\Sdk\Logger
  */
-class KatanaLogger
+abstract class KatanaLogger
 {
-    const FORMAT = '%TIMESTAMP% [%TYPE%] [SDK] %MESSAGE% %REQUEST_ID%';
-
     const LOG_DEBUG = 0;
     const LOG_INFO = 1;
     const LOG_WARNING = 2;
@@ -46,11 +44,9 @@ class KatanaLogger
     /**
      * @param int $level
      */
-    public function __construct($level = null)
+    public function __construct(int $level = null)
     {
-        if ($level !== null) {
-            $this->level = $level;
-        }
+        $this->level = $level ?? $this->level;
     }
 
     /**
@@ -64,7 +60,7 @@ class KatanaLogger
     /**
      * @return bool|string
      */
-    private function getTimestamp()
+    protected function getTimestamp()
     {
         list($usec, $sec) = explode(" ", microtime());
         return sprintf(
@@ -75,57 +71,54 @@ class KatanaLogger
     }
 
     /**
-     * @param string $level
+     * @param int $level
      * @param string $message
-     * @param string $requestId
+     * @return string
      */
-    private function log($level, $message, $requestId = '')
+    abstract protected function formatMessage(int $level, string $message): string;
+
+    /**
+     * @param int $level
+     * @param string $message
+     */
+    protected function log(int $level, string $message)
     {
         if ($level < $this->level) {
             return;
         }
 
-        $requestId = $requestId? "|$requestId|" : '';
-        echo trim(str_replace(
-            ['%TIMESTAMP%', '%TYPE%', '%MESSAGE%', '%REQUEST_ID%'],
-            [$this->getTimestamp(), self::LOG_LEVELS[$level], $message, $requestId],
-            self::FORMAT
-        )), "\n";
+        echo $this->formatMessage($level, $message), "\n";
     }
 
     /**
      * @param string $message
-     * @param string $requestId
      */
-    public function debug($message, $requestId = '')
+    public function debug(string $message)
     {
-        $this->log(self::LOG_DEBUG, $message, $requestId);
+        $this->log(self::LOG_DEBUG, $message);
     }
 
     /**
      * @param string $message
-     * @param string $requestId
      */
-    public function info($message, $requestId = '')
+    public function info(string $message)
     {
-        $this->log(self::LOG_INFO, $message, $requestId);
+        $this->log(self::LOG_INFO, $message);
     }
 
     /**
      * @param string $message
-     * @param string $requestId
      */
-    public function warning($message, $requestId = '')
+    public function warning(string $message)
     {
-        $this->log(self::LOG_WARNING, $message, $requestId);
+        $this->log(self::LOG_WARNING, $message);
     }
 
     /**
      * @param string $message
-     * @param string $requestId
      */
-    public function error($message, $requestId = '')
+    public function error(string $message)
     {
-        $this->log(self::LOG_ERROR, $message, $requestId);
+        $this->log(self::LOG_ERROR, $message);
     }
 }

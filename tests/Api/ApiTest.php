@@ -18,6 +18,7 @@ namespace Katana\Sdk\Tests\Api;
 use Katana\Sdk\Api\Api;
 use Katana\Sdk\Component\Component;
 use Katana\Sdk\Logger\KatanaLogger;
+use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Schema\Mapping;
 use Katana\Sdk\Schema\ServiceSchema;
 use PHPUnit\Framework\TestCase;
@@ -48,7 +49,7 @@ class ApiTest extends TestCase
 
     public function setUp()
     {
-        $this->logger = $this->prophesize(KatanaLogger::class);
+        $this->logger = $this->prophesize(RequestKatanaLogger::class);
         $this->logger->getLevel()->willReturn(KatanaLogger::LOG_DEBUG);
 
         $this->mapping = $this->prophesize(Mapping::class);
@@ -171,7 +172,7 @@ class ApiTest extends TestCase
 
     public function testLogNotDebug()
     {
-        $this->logger = $this->prophesize(KatanaLogger::class);
+        $this->logger = $this->prophesize(RequestKatanaLogger::class);
 
         $this->api = new ApiStub(
             $this->logger->reveal(),
