@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## Fixed
+- Add request ID in logs
 
 ## [1.2.6] - 2017-10-12
 ## Changed
