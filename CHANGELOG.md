@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ## Fixed
 - Add request ID in logs
+- Catch errors while parsing the command
 
 ## [1.2.6] - 2017-10-12
 ## Changed
