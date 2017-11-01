@@ -134,7 +134,14 @@ class ZeroMqLoopExecutor extends AbstractExecutor
 
                 $command = $msg->unserialize($payload);
 
-                $api = $factory->build($action, $command, $input, $this->mapping);
+                try {
+                    $api = $factory->build($action, $command, $input, $this->mapping);
+                } catch (\Throwable $e) {
+                    $this->logger->error(
+                        "{$e->getMessage()} in {$e->getFile()} on line {$e->getLine()}"
+                    );
+                    return $this->sendError("Error parsing command");
+                }
                 $this->executeCallback($api, $action, $callbacks, $errorCallback);
 
                 return true;
