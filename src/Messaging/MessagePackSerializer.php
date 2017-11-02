@@ -15,7 +15,9 @@
 
 namespace Katana\Sdk\Messaging;
 
+use Katana\Sdk\Exception\UnserializationFailedException;
 use MessagePack\BufferUnpacker;
+use MessagePack\Exception\UnpackingFailedException;
 use MessagePack\Packer;
 
 class MessagePackSerializer
@@ -38,9 +40,13 @@ class MessagePackSerializer
      */
     public function unserialize($message)
     {
-        $unpacker = new BufferUnpacker();
-        $unpacker->reset($message);
+        try {
+            $unpacker = new BufferUnpacker();
+            $unpacker->reset($message);
 
-        return $unpacker->unpack();
+            return $unpacker->unpack();
+        } catch (UnpackingFailedException $e) {
+            throw new UnserializationFailedException($e->getMessage(), 0, $e);
+        }
     }
 }
