@@ -385,7 +385,7 @@ class ActionApi extends Api implements Action
         string $action,
         array $params = [],
         array $files = [],
-        int $timeout = 1000
+        int $timeout = 10000
     ) {
         $address = 'ipc://@katana-' . preg_replace(
             '/[^a-zA-Z0-9-]/',
@@ -478,7 +478,7 @@ class ActionApi extends Api implements Action
         string $action,
         array $params = [],
         array $files = [],
-        int $timeout = 1000
+        int $timeout = 10000
     ): Action {
         $serviceSchema = $this->getServiceSchema($this->name, $this->version);
         $actionSchema = $serviceSchema->getActionSchema($this->actionName);

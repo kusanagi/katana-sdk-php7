@@ -115,7 +115,7 @@ class ZeroMQRuntimeCaller
         string $address,
         array $params = [],
         array $files = [],
-        int $timeout = 1000
+        int $timeout = 10000
     ) {
         $message = $this->runtimeCallWriter->writeRuntimeCall(
             $action,
