@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.8] - 2017-11-07
+## Changed
+- Increase call timeouts
+
 ## [1.2.7] - 2017-11-02
 ## Fixed
 - Add request ID in logs
