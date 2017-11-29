@@ -227,4 +227,17 @@ abstract class Api
     {
         return $this->mapping->find($name, $version);
     }
+
+    /**
+     * Disabled.
+     *
+     * This SDK implementation has no async support.
+     *
+     * @see https://github.com/kusanagi/katana-sdk-spec#apidone--boolean
+     * @return bool
+     */
+    public function done(): bool
+    {
+        return false;
+    }
 }
