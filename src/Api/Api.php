@@ -15,6 +15,7 @@
 
 namespace Katana\Sdk\Api;
 use Katana\Sdk\Component\Component;
+use Katana\Sdk\Exception\UnsupportedException;
 use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Schema\Mapping;
 use Katana\Sdk\Schema\ServiceSchema;
@@ -238,6 +239,6 @@ abstract class Api
      */
     public function done(): bool
     {
-        return false;
+        throw new UnsupportedException('SDK does not support async call to end action: Api.done()');
     }
 }
