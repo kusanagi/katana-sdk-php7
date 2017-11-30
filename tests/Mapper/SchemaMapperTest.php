@@ -113,6 +113,12 @@ class SchemaMapperTest extends TestCase
         $this->assertEquals('uid', $action->getPrimaryKey());
         $this->assertEquals(true, $action->isCollection());
 
+        // Assert tags
+        $this->assertTrue($action->hasTag('one'));
+        $this->assertTrue($action->hasTag('two'));
+        $this->assertFalse($action->hasTag('three'));
+        $this->assertEquals(['one', 'two'], $action->getTags());
+
         // Assert http
         $http = $action->getHttpSchema();
         $this->assertEquals(true, $http->isAccessible());

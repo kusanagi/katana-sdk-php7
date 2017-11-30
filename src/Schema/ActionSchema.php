@@ -71,6 +71,11 @@ class ActionSchema
     private $remoteCalls = [];
 
     /**
+     * @var string[]
+     */
+    private $tags = [];
+
+    /**
      * @var ActionReturn
      */
     private $return;
@@ -86,6 +91,7 @@ class ActionSchema
      * @param array $calls
      * @param array $deferCalls
      * @param array $remoteCalls
+     * @param array $tags
      * @param ActionReturn $return
      */
     public function __construct(
@@ -99,6 +105,7 @@ class ActionSchema
         array $calls,
         array $deferCalls,
         array $remoteCalls,
+        array $tags = [],
         ActionReturn $return = null
     ) {
         $paramNames = array_map(function (ParamSchema $param) {
@@ -120,6 +127,7 @@ class ActionSchema
         $this->calls = $calls;
         $this->deferCalls = $deferCalls;
         $this->remoteCalls = $remoteCalls;
+        $this->tags = $tags;
         $this->return = $return;
     }
 
@@ -399,6 +407,23 @@ class ActionSchema
     public function hasReturn()
     {
         return !is_null($this->return);
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasTag(string $name): bool
+    {
+        return in_array($name, $this->tags);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getTags(): array
+    {
+        return $this->tags;
     }
 
     /**
