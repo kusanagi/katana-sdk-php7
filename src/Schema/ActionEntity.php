@@ -110,6 +110,10 @@ class ActionEntity
             $result['fields'] = array_map([$this, 'parseObjectField'], $definition['F']);
         }
 
+        if (isset($definition['n'])) {
+            $result['name'] = $definition['n'];
+        }
+
         if (isset($definition['V'])) {
             $result['validate'] = $definition['V'];
         }

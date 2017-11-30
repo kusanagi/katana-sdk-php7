@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ## Added
 - Tags in ActionSchema
+- Entity name in ActionSchema
 
 ## [1.2.8] - 2017-11-07
 ## Changed
