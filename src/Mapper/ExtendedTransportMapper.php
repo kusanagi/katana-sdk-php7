@@ -88,13 +88,28 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
     {
         $output = [];
         $output = $this->writeTransportMeta($transport->getMeta(), $output);
-        $output = $this->writeTransportFiles($transport->getFiles(), $output);
-        $output = $this->writeTransportData($transport->getData(), $output);
-        $output = $this->writeTransportRelations($transport->getRelations(), $output);
-        $output = $this->writeTransportLinks($transport->getLinks(), $output);
-        $output = $this->writeTransportCalls($transport->getCalls(), $output);
-        $output = $this->writeTransportTransactions($transport->getTransactions(), $output);
-        $output = $this->writeTransportErrors($transport->getErrors(), $output);
+
+        if ($transport->getFiles()->getAll()) {
+            $output = $this->writeTransportFiles($transport->getFiles(), $output);
+        }
+        if ($transport->getData()->get()) {
+            $output = $this->writeTransportData($transport->getData(), $output);
+        }
+        if ($transport->getRelations()->get()) {
+            $output = $this->writeTransportRelations($transport->getRelations(), $output);
+        }
+        if ($transport->getLinks()->get()) {
+            $output = $this->writeTransportLinks($transport->getLinks(), $output);
+        }
+        if ($transport->getCalls()->get()) {
+            $output = $this->writeTransportCalls($transport->getCalls(), $output);
+        }
+        if ($transport->getTransactions()->get()) {
+            $output = $this->writeTransportTransactions($transport->getTransactions(), $output);
+        }
+        if ($transport->getErrors()->get()) {
+            $output = $this->writeTransportErrors($transport->getErrors(), $output);
+        }
         if ($transport->hasBody()) {
             $output = $this->writeTransportBody($transport->getBody(), $output);
         }
@@ -439,9 +454,6 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
             if ($transaction->getParams()) {
                 $transactionData['params'] = array_map([$this, 'writeParam'], $transaction->getParams());
-            } else {
-                // todo: remove when katana makes parameters optional
-                $transactionData['params'] = [];
             }
 
             $type = $transaction->getType();
@@ -490,11 +502,17 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
     public function writeTransportErrors(TransportErrors $errors, array $output)
     {
         foreach ($errors->get() as $error) {
-            $output['errors'][$error->getService()][$error->getVersion()][] = [
-                'message' => $error->getMessage(),
-                'code' => $error->getCode(),
-                'status' => $error->getStatus(),
-            ];
+            $errorData = [];
+            if ($error->getMessage()) {
+                $errorData['message'] = $error->getMessage();
+            }
+            if ($error->getCode()) {
+                $errorData['code'] = $error->getCode();
+            }
+            if ($error->getStatus()) {
+                $errorData['status'] = $error->getStatus();
+            }
+            $output['errors'][$error->getService()][$error->getVersion()][] = $errorData;
         }
 
         return $output;
