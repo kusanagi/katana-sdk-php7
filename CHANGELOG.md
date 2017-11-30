@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Added
 - Tags in ActionSchema
 - Entity name in ActionSchema
+## Changed
+- Removed empty elements from transport writes
 
 ## [1.2.8] - 2017-11-07
 ## Changed
