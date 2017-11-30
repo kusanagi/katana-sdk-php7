@@ -172,6 +172,7 @@ class SchemaMapper
                 $this->read($action, 'C', []),
                 $this->read($action, 'dc', []),
                 $this->read($action, 'rc', []),
+                $this->read($action, 't', []),
                 $return
             );
         }
