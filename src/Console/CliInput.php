@@ -194,6 +194,14 @@ class CliInput
     /**
      * @return string
      */
+    public function getComponent(): string
+    {
+        return $this->component;
+    }
+
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
