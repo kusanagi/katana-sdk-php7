@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## Added
 - Tags in ActionSchema
 - Entity name in ActionSchema
+- `Api.done()` function returning null for lack of async support.
 ## Changed
 - Removed empty elements from transport writes
 

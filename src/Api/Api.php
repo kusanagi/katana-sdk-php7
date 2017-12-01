@@ -15,6 +15,7 @@
 
 namespace Katana\Sdk\Api;
 use Katana\Sdk\Component\Component;
+use Katana\Sdk\Exception\UnsupportedException;
 use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Schema\Mapping;
 use Katana\Sdk\Schema\ServiceSchema;
@@ -226,5 +227,18 @@ abstract class Api
     ): ServiceSchema
     {
         return $this->mapping->find($name, $version);
+    }
+
+    /**
+     * Disabled.
+     *
+     * This SDK implementation has no async support.
+     *
+     * @see https://github.com/kusanagi/katana-sdk-spec#apidone--boolean
+     * @return bool
+     */
+    public function done(): bool
+    {
+        throw new UnsupportedException('SDK does not support async call to end action: Api.done()');
     }
 }
