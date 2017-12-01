@@ -15,6 +15,9 @@
 
 namespace Katana\Sdk\Logger;
 
+use Exception;
+use Katana\Sdk\Console\CliInput;
+
 /**
  * Logger class
  *
@@ -23,16 +26,39 @@ namespace Katana\Sdk\Logger;
 class GlobalKatanaLogger extends KatanaLogger
 {
     /**
+     * @var CliInput
+     */
+    private $input;
+
+    /**
+     * @param CliInput $input
+     * @param int $level
+     */
+    public function __construct(CliInput $input, int $level = null)
+    {
+        $this->input = $input;
+        parent::__construct($level);
+    }
+
+
+    /**
      * @param int $level
      * @param string $message
      * @return string
+     * @throws Exception
      */
     protected function formatMessage(int $level, string $message): string
     {
         return trim(str_replace(
-            ['%TIMESTAMP%', '%TYPE%', '%MESSAGE%'],
-            [$this->getTimestamp(), self::LOG_LEVELS[$level], $message],
-            '%TIMESTAMP% [%TYPE%] [SDK] %MESSAGE%'
+            ['%TIMESTAMP%', '%COMPONENT%', '%FRAMEWORK_VERSION%', '%TYPE%', '%MESSAGE%'],
+            [
+                $this->getTimestamp(),
+                "{$this->input->getComponent()} {$this->input->getName()}/{$this->input->getVersion()}",
+                $this->input->getFrameworkVersion(),
+                self::LOG_LEVELS[$level],
+                $message
+            ],
+            '%TIMESTAMP% %COMPONENT% (%FRAMEWORK_VERSION%) [%TYPE%] [SDK] %MESSAGE%'
         ));
     }
 
@@ -42,6 +68,6 @@ class GlobalKatanaLogger extends KatanaLogger
      */
     public function getRequestLogger(string $requestId): RequestKatanaLogger
     {
-        return new RequestKatanaLogger($requestId, $this->getLevel());
+        return new RequestKatanaLogger($this->input, $requestId, $this->getLevel());
     }
 }

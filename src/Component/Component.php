@@ -93,7 +93,7 @@ abstract class Component
         } else {
             $level = KatanaLogger::LOG_INFO;
         }
-        $this->logger = new GlobalKatanaLogger($level);
+        $this->logger = new GlobalKatanaLogger($this->input, $level);
 
         $mapper = $this->input->getMapping() === 'compact'
             ? new CompactPayloadMapper()

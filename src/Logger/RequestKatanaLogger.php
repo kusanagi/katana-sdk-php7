@@ -15,27 +15,30 @@
 
 namespace Katana\Sdk\Logger;
 
+use Katana\Sdk\Console\CliInput;
+
 /**
  * Logger class
  *
  * @package Katana\Sdk\Logger
  */
-class RequestKatanaLogger extends KatanaLogger
+class RequestKatanaLogger extends GlobalKatanaLogger
 {
+    /**
+     * @param CliInput $input
+     * @param string $requestId
+     * @param int|null $level
+     */
+    public function __construct(CliInput $input, string $requestId, int $level = null)
+    {
+        $this->requestId = $requestId;
+        parent::__construct($input, $level);
+    }
+
     /**
      * @var string
      */
     private $requestId = '';
-
-    /**
-     * @param string $requestId
-     * @param int|null $level
-     */
-    public function __construct(string $requestId, int $level = null)
-    {
-        $this->requestId = $requestId;
-        parent::__construct($level);
-    }
 
     /**
      * @param int $level
@@ -44,10 +47,6 @@ class RequestKatanaLogger extends KatanaLogger
      */
     protected function formatMessage(int $level, string $message): string
     {
-        return trim(str_replace(
-            ['%TIMESTAMP%', '%TYPE%', '%MESSAGE%', '%REQUEST_ID%'],
-            [$this->getTimestamp(), self::LOG_LEVELS[$level], $message, $this->requestId],
-            '%TIMESTAMP% [%TYPE%] [SDK] %MESSAGE% |%REQUEST_ID%|'
-        ));
+        return parent::formatMessage($level, $message) . " |{$this->requestId}|";
     }
 }

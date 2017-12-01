@@ -15,15 +15,31 @@
 
 namespace Katana\Sdk\Tests\Logger;
 
+use Katana\Sdk\Console\CliInput;
 use Katana\Sdk\Logger\RequestKatanaLogger;
 use Katana\Sdk\Logger\KatanaLogger;
 use PHPUnit\Framework\TestCase;
 
 class RequestKatanaLoggerTest extends TestCase
 {
+    /**
+     * @var CliInput
+     */
+    private $cliInput;
+
+    public function setUp()
+    {
+        $cliInputProphecy = $this->prophesize(CliInput::class);
+        $cliInputProphecy->getComponent()->willReturn('service');
+        $cliInputProphecy->getName()->willReturn('test');
+        $cliInputProphecy->getVersion()->willReturn('1.0.0');
+        $cliInputProphecy->getFrameworkVersion()->willReturn('1.2.3');
+        $this->cliInput = $cliInputProphecy->reveal();
+    }
+
     public function testSkipDebugLog()
     {
-        $logger = new RequestKatanaLogger('request_id');
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id');
 
         $this->expectOutputString('');
         $logger->debug('Test log');
@@ -31,15 +47,15 @@ class RequestKatanaLoggerTest extends TestCase
 
     public function testDebugLog()
     {
-        $logger = new RequestKatanaLogger('request_id', KatanaLogger::LOG_DEBUG);
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id', KatanaLogger::LOG_DEBUG);
 
-        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z \[DEBUG\] \[SDK\] Test log |request_id|$/');
+        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z service test\/1.0.0 \(1.2.3\) \[DEBUG\] \[SDK\] Test log |request_id|$/');
         $logger->debug('Test log');
     }
 
     public function testSkipInfoLog()
     {
-        $logger = new RequestKatanaLogger('request_id', KatanaLogger::LOG_WARNING);
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id', KatanaLogger::LOG_WARNING);
 
         $this->expectOutputString('');
         $logger->info('Test log');
@@ -47,15 +63,15 @@ class RequestKatanaLoggerTest extends TestCase
 
     public function testInfoLog()
     {
-        $logger = new RequestKatanaLogger('request_id');
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id');
 
-        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z \[INFO\] \[SDK\] Test log |request_id|$/');
+        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z service test\/1.0.0 \(1.2.3\)  \[INFO\] \[SDK\] Test log |request_id|$/');
         $logger->info('Test log');
     }
 
     public function testSkipWarningLog()
     {
-        $logger = new RequestKatanaLogger('request_id', KatanaLogger::LOG_ERROR);
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id', KatanaLogger::LOG_ERROR);
 
         $this->expectOutputString('');
         $logger->warning('Test log');
@@ -63,17 +79,17 @@ class RequestKatanaLoggerTest extends TestCase
 
     public function testWarningLog()
     {
-        $logger = new RequestKatanaLogger('request_id');
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id');
 
-        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z \[WARNING\] \[SDK\] Test log |request_id|$/');
+        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z service test\/1.0.0 \(1.2.3\)  \[WARNING\] \[SDK\] Test log |request_id|$/');
         $logger->warning('Test log');
     }
 
     public function testErrorLog()
     {
-        $logger = new RequestKatanaLogger('request_id', KatanaLogger::LOG_ERROR);
+        $logger = new RequestKatanaLogger($this->cliInput, 'request_id', KatanaLogger::LOG_ERROR);
 
-        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z \[ERROR\] \[SDK\] Test log |request_id|$/');
+        $this->expectOutputRegex('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,5}Z service test\/1.0.0 \(1.2.3\)  \[ERROR\] \[SDK\] Test log |request_id|$/');
         $logger->error('Test log');
     }
 }
