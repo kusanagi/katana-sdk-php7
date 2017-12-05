@@ -277,7 +277,7 @@ class CompactPayloadMapper implements PayloadMapperInterface
         return new HttpResponse(
             $raw['c']['a']['R']['v'],
             new HttpStatus($statusCode, $statusText),
-            $raw['c']['a']['R']['b'],
+            $raw['c']['a']['R']['b'] ?? '',
             $headers
         );
     }

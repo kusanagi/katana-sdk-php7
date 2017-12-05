@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## Fixed
+- Add a default value for the optional response body
 
 ## [1.3.0] - 2017-12-01
 ## Added
