@@ -269,7 +269,7 @@ class ExtendedPayloadMapper implements PayloadMapperInterface
         return new HttpResponse(
             $raw['command']['arguments']['response']['version'],
             new HttpStatus($statusCode, $statusText),
-            $raw['command']['arguments']['response']['body'],
+            $raw['command']['arguments']['response']['body'] ?? '',
             $headers
         );
     }
