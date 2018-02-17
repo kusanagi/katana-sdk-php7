@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Changed
 - Move primary key to the schema entity
+- Psr Log levels support in CLI and Api::log()
 
 ## [1.3.1] - 2017-12-05
 ## Fixed

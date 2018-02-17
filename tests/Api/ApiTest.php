@@ -69,74 +69,74 @@ class ApiTest extends TestCase
 
     public function testLogNull()
     {
-        $this->logger->debug('NULL')->shouldBeCalled();
+        $this->logger->log(6, 'NULL')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(null));
     }
 
     public function testLogBoolTrue()
     {
-        $this->logger->debug('TRUE')->shouldBeCalled();
+        $this->logger->log(6, 'TRUE')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(true));
     }
 
     public function testLogBoolFalse()
     {
-        $this->logger->debug('FALSE')->shouldBeCalled();
+        $this->logger->log(6, 'FALSE')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(false));
     }
 
     public function testLogPositiveInteger()
     {
-        $this->logger->debug('15')->shouldBeCalled();
+        $this->logger->log(6, '15')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(15));
     }
 
     public function testLogNegativeInteger()
     {
-        $this->logger->debug('-12')->shouldBeCalled();
+        $this->logger->log(6, '-12')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(-12));
     }
 
     public function testLogPositiveFloat()
     {
-        $this->logger->debug('555.45')->shouldBeCalled();
+        $this->logger->log(6, '555.45')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(555.45));
     }
 
     public function testLogPositiveTruncatedFloat()
     {
-        $this->logger->debug('555.123456789')->shouldBeCalled();
+        $this->logger->log(6, '555.123456789')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(555.123456789123));
     }
 
     public function testLogNegativeFloat()
     {
-        $this->logger->debug('-777.54')->shouldBeCalled();
+        $this->logger->log(6, '-777.54')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(-777.54));
     }
 
     public function testLogNegativeTruncatedFloat()
     {
-        $this->logger->debug('-777.123456789')->shouldBeCalled();
+        $this->logger->log(6, '-777.123456789')->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(-777.123456789123));
     }
 
     public function testLogArrayList()
     {
-        $this->logger->debug(json_encode(['a', 'b', 'c']))->shouldBeCalled();
+        $this->logger->log(6, json_encode(['a', 'b', 'c']))->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(['a', 'b', 'c']));
     }
 
     public function testLogArrayDict()
     {
-        $this->logger->debug(json_encode(['a' => 'b', 'c' => 4]))->shouldBeCalled();
+        $this->logger->log(6, json_encode(['a' => 'b', 'c' => 4]))->shouldBeCalled();
         $this->assertEquals(true, $this->api->log(['a' => 'b', 'c' => 4]));
     }
 
     public function testLogCallableClassArray()
     {
         $className = Test::class;
-        $this->logger->debug("function $className::staticTest")->shouldBeCalled();
+        $this->logger->log(6, "function $className::staticTest")->shouldBeCalled();
         $this->assertEquals(true, $this->api->log([Test::class, 'staticTest']));
     }
 
@@ -144,21 +144,21 @@ class ApiTest extends TestCase
     {
         $className = Test::class;
         $obj = new Test();
-        $this->logger->debug("function $className::instanceTest")->shouldBeCalled();
+        $this->logger->log(6, "function $className::instanceTest")->shouldBeCalled();
         $this->assertEquals(true, $this->api->log([$obj, 'instanceTest']));
     }
 
     public function testLogCallableClosure()
     {
         $closure = function () {};
-        $this->logger->debug("function anonymous")->shouldBeCalled();
+        $this->logger->log(6, "function anonymous")->shouldBeCalled();
         $this->assertEquals(true, $this->api->log($closure));
     }
 
     public function testLogResource()
     {
         $resource = fopen(__FILE__, 'r');
-        $this->logger->debug((string) $resource)->shouldBeCalled();
+        $this->logger->log(6, (string) $resource)->shouldBeCalled();
         $this->assertEquals(true, $this->api->log($resource));
     }
 
@@ -166,29 +166,8 @@ class ApiTest extends TestCase
     {
         $string = str_pad('Test string', 120000, '.');
         $expected = str_pad('Test string', 100000, '.');
-        $this->logger->debug($expected)->shouldBeCalled();
+        $this->logger->log(6, $expected)->shouldBeCalled();
         $this->assertEquals(true, $this->api->log($string));
-    }
-
-    public function testLogNotDebug()
-    {
-        $this->logger = $this->prophesize(RequestKatanaLogger::class);
-
-        $this->api = new ApiStub(
-            $this->logger->reveal(),
-            $this->prophesize(Component::class)->reveal(),
-            $this->prophesize(Mapping::class)->reveal(),
-            '/',
-            'test',
-            '1.0',
-            '1.0.0',
-            [],
-            false
-        );
-
-        $this->logger->debug(Argument::any())->shouldNotBeCalled();
-        $this->logger->getLevel()->willReturn(KatanaLogger::LOG_INFO);
-        $this->assertEquals(false, $this->api->log('test'));
     }
 
     public function testGetServices()

@@ -27,14 +27,11 @@ trait ApiLoggerTrait
 
     /**
      * @param mixed $value
+     * @param int $level
      * @return bool
      */
-    public function log($value): bool
+    public function log($value, int $level = KatanaLogger::LOG_INFO): bool
     {
-        if ($this->logger->getLevel() !== KatanaLogger::LOG_DEBUG) {
-            return false;
-        }
-
         if (is_null($value)) {
             $log = 'NULL';
         } elseif (is_string($value)) {
@@ -63,7 +60,7 @@ trait ApiLoggerTrait
             $log = 'Unknown value type';
         }
 
-        $this->logger->debug(substr($log, 0, 100000));
+        $this->logger->log($level, substr($log, 0, 100000));
 
         return true;
     }

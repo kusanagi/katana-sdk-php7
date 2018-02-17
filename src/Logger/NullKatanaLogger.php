@@ -15,38 +15,30 @@
 
 namespace Katana\Sdk\Logger;
 
-use Katana\Sdk\Console\CliInput;
-
-/**
- * Logger class
- *
- * @package Katana\Sdk\Logger
- */
-class RequestKatanaLogger extends GlobalKatanaLogger
+class NullKatanaLogger extends KatanaLogger
 {
-    /**
-     * @param CliInput $input
-     * @param string $requestId
-     */
-    public function __construct(CliInput $input, string $requestId)
+    public function __construct()
     {
-        $this->requestId = $requestId;
-        parent::__construct($input);
-    }
 
-    /**
-     * @var string
-     */
-    private $requestId = '';
+    }
 
     /**
      * @param int $level
      * @param string $message
      * @return string
-     * @throws \Exception
      */
     protected function formatMessage(int $level, string $message): string
     {
-        return parent::formatMessage($level, $message) . " |{$this->requestId}|";
+        return '';
+    }
+
+    /**
+     * @param int $level
+     * @param string $message
+     * @param array $context
+     */
+    public function log($level, $message, array $context = [])
+    {
+        // do nothing
     }
 }
