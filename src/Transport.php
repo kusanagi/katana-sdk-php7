@@ -15,6 +15,8 @@
 
 namespace Katana\Sdk;
 
+use Katana\Sdk\Api\Transport\Link;
+
 /**
  * Interface to the Transport object contained in a payload
  * @package Katana\Sdk
@@ -121,13 +123,9 @@ interface Transport
     /**
      * Return all the links stored in the Transport
      *
-     * If the optional "service" argument is specified, only links under that
-     * service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Link[]
      */
-    public function getLinks(string$service = ''): array;
+    public function getLinks(): array;
 
     /**
      * Return all the calls stored in the Transport

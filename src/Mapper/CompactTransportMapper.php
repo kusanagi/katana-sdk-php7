@@ -23,6 +23,7 @@ use Katana\Sdk\Api\RemoteCall;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -97,7 +98,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         if ($transport->getRelations()->get()) {
             $output = $this->writeTransportRelations($transport->getRelations(), $output);
         }
-        if ($transport->getLinks()->get()) {
+        if ($transport->getLinks()) {
             $output = $this->writeTransportLinks($transport->getLinks(), $output);
         }
         if ($transport->getCalls()->get()) {
@@ -330,28 +331,38 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportLinks
+     * @return Link[]
      */
-    public function getTransportLinks(array $raw)
+    public function getTransportLinks(array $raw): array
     {
-        if (isset($raw['l']) && (array) $raw['l']) {
-            $links = $raw['l'];
-        } else {
-            $links = [];
+        if (!isset($raw['l'])) {
+            return [];
         }
 
-        return new TransportLinks($links);
+        $links = [];
+
+        foreach ($raw['l'] as $address => $addressLinks) {
+            foreach ($addressLinks as $name => $serviceLinks) {
+                foreach ($serviceLinks as $link => $uri) {
+                    $links[] = new Link($address, $name, $link, $uri);
+                }
+            }
+        }
+
+        return $links;
     }
 
     /**
-     * @param TransportLinks $links
+     * @param Link[] $links
      * @param array $output
      * @return array
      */
-    public function writeTransportLinks(TransportLinks $links, array $output)
+    public function writeTransportLinks(array $links, array $output): array
     {
-        if ($links->get()) {
-            $output['l'] = $links->get();
+        $links = [];
+
+        foreach ($links as $link) {
+            $links[$link->getAddress()][$link->getName()][$link->getLink()] = $link->getUri();
         }
 
         return $output;
@@ -612,16 +623,15 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
 
         // Merge links
-        $links = $transport->getLinks()->get();
+        $links = [];
         foreach ($mergeData['l'] ?? [] as $address => $aLinks) {
             foreach ($aLinks as $namespace => $nLinks) {
                 foreach ($nLinks as $name => $link) {
-                    if (!isset($links[$address][$namespace][$name])) {
-                        $transport->getLinks()->setLink($address, $namespace, $name, $link);
-                    }
+                    $links[] = new Link($address, $namespace, $name, $link);
                 }
             }
         }
+        $transport->mergeLinks(...$links);
 
         // Merge calls
         foreach ($mergeData['C'] ?? [] as $service => $sCalls) {

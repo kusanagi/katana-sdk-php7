@@ -17,6 +17,7 @@ namespace Katana\Sdk\Mapper;
 
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -82,17 +83,11 @@ interface TransportWriterInterface
     public function writeTransportRelations(TransportRelations $relations, array $output);
 
     /**
-     * @param array $raw
-     * @return TransportLinks
-     */
-    public function getTransportLinks(array $raw);
-
-    /**
-     * @param TransportLinks $links
+     * @param Link[] $links
      * @param array $output
      * @return array
      */
-    public function writeTransportLinks(TransportLinks $links, array $output);
+    public function writeTransportLinks(array $links, array $output): array;
 
     /**
      * @param TransportCalls $calls

@@ -15,6 +15,7 @@
 
 namespace Katana\Sdk\Api;
 
+use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\File as FileInterface;
 
@@ -51,9 +52,9 @@ class Transport
     private $relations;
 
     /**
-     * @var TransportLinks
+     * @var Link[]
      */
-    private $links;
+    private $links = [];
 
     /**
      * @var TransportCalls
@@ -82,7 +83,7 @@ class Transport
             new TransportFiles([]),
             new TransportData(),
             new TransportRelations(),
-            new TransportLinks(),
+            [],
             new TransportCalls(),
             new TransportTransactions(),
             new TransportErrors()
@@ -94,7 +95,7 @@ class Transport
      * @param TransportFiles $files
      * @param TransportData $data
      * @param TransportRelations $relations
-     * @param TransportLinks $links
+     * @param Link[] $links
      * @param TransportCalls $calls
      * @param TransportTransactions $transactions
      * @param TransportErrors $errors
@@ -105,7 +106,7 @@ class Transport
         TransportFiles $files,
         TransportData $data,
         TransportRelations $relations,
-        TransportLinks $links,
+        array $links,
         TransportCalls $calls,
         TransportTransactions $transactions,
         TransportErrors $errors,
@@ -174,7 +175,7 @@ class Transport
     }
 
     /**
-     * @return TransportLinks
+     * @return Link[]
      */
     public function getLinks()
     {
@@ -336,14 +337,64 @@ class Transport
     }
 
     /**
+     * @param string $address
+     * @param string $namespace
+     * @param string $link
+     * @return int
+     */
+    private function findLink(string $address, string $namespace, string $link): int
+    {
+        $match = array_filter(
+            $this->links,
+            function (Link $linkObject) use ($address, $namespace, $link) {
+                return $linkObject->getAddress() === $address
+                    && $linkObject->getName() === $namespace
+                    && $linkObject->getLink() === $link;
+            }
+        );
+
+        if ($match) {
+            return key($match);
+        } else {
+            return -1;
+        }
+    }
+
+    /**
      * @param string $namespace
      * @param string $link
      * @param string $uri
      * @return bool
      */
-    public function setLink($namespace, $link, $uri)
+    public function setLink($namespace, $link, $uri): bool
     {
-        return $this->links->setLink($this->meta->getGateway()[1], $namespace, $link, $uri);
+        $linkObject = new Link(
+            $this->meta->getGateway()[1],
+            $namespace,
+            $link,
+            $uri
+        );
+
+        $match = $this->findLink($this->meta->getGateway()[1], $namespace, $link);
+        if ($match >= 0) {
+            $this->links[$match] = $linkObject;
+        } else {
+            $this->links[] = $linkObject;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Link[] $links
+     */
+    public function mergeLinks(Link ...$links)
+    {
+        foreach ($links as $link) {
+            if ($this->findLink($link->getAddress(), $link->getName(), $link->getLink()) === -1) {
+                $this->links[] = $link;
+            }
+        }
     }
 
     /**

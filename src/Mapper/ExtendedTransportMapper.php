@@ -22,6 +22,7 @@ use Katana\Sdk\Api\Param;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -98,7 +99,7 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
         if ($transport->getRelations()->get()) {
             $output = $this->writeTransportRelations($transport->getRelations(), $output);
         }
-        if ($transport->getLinks()->get()) {
+        if ($transport->getLinks()) {
             $output = $this->writeTransportLinks($transport->getLinks(), $output);
         }
         if ($transport->getCalls()->get()) {
@@ -322,27 +323,39 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportLinks
+     * @return Link[]
      */
-    public function getTransportLinks(array $raw)
+    public function getTransportLinks(array $raw): array
     {
-        if (isset($raw['links'])) {
-            $links = $raw['links'];
-        } else {
-            $links = [];
+        if (!isset($raw['links'])) {
+            return [];
         }
 
-        return new TransportLinks($links);
+        $links = [];
+
+        foreach ($raw['links'] as $address => $addressLinks) {
+            foreach ($addressLinks as $name => $serviceLinks) {
+                foreach ($serviceLinks as $link => $uri) {
+                    $links[] = new Link($address, $name, $link, $uri);
+                }
+            }
+        }
+
+        return $links;
     }
 
     /**
-     * @param TransportLinks $links
+     * @param Link[] $links
      * @param array $output
      * @return array
      */
-    public function writeTransportLinks(TransportLinks $links, array $output)
+    public function writeTransportLinks(array $links, array $output): array
     {
-        $output['links'] = $links->get();
+        $links = [];
+
+        foreach ($links as $link) {
+            $links[$link->getAddress()][$link->getName()][$link->getLink()] = $link->getUri();
+        }
 
         return $output;
     }
