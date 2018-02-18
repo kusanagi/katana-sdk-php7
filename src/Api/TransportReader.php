@@ -101,19 +101,11 @@ class TransportReader implements TransportInterface
     }
 
     /**
-     * @param string $address
-     * @param string $service
-     * @param string $version
-     * @param string $action
      * @return array
      */
-    public function getData(
-        string $address = '',
-        string $service = '',
-        string $version = '',
-        string $action = ''
-    ): array {
-        return $this->transport->getData()->get($address, $service, $version, $action);
+    public function getData(): array
+    {
+        return $this->transport->getData();
     }
 
     /**

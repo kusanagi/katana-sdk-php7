@@ -22,7 +22,9 @@ use Katana\Sdk\Api\Param;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\ActionData;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -269,27 +271,46 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportData|null
+     * @return ServiceData[]
+     * @throws \Katana\Sdk\Exception\InvalidValueException
      */
-    public function getTransportData(array $raw)
+    public function getTransportData(array $raw): array
     {
-        if (isset($raw['data'])) {
-            $data = $raw['data'];
-        } else {
-            $data = [];
+        if (!isset($raw['data'])) {
+            return [];
         }
 
-        return new TransportData($data);
+        $datas = [];
+
+        foreach ($raw['data'] as $address => $addressData) {
+            foreach ($addressData as $name => $serviceData) {
+                foreach ($serviceData as $version => $versionData) {
+                    $actionDatas = [];
+                    foreach ($versionData as $action => $actionData) {
+                        foreach ($actionData as $data) {
+                            $actionDatas[] = new ActionData($action, $data);
+                        }
+                    }
+                    $datas[] = new ServiceData($address, $name, $version, $actionDatas);
+                }
+            }
+        }
+
+        return $datas;
     }
 
     /**
-     * @param TransportData $data
+     * @param ServiceData[] $data
      * @param array $output
      * @return array
      */
-    public function writeTransportData(TransportData $data, array $output)
+    public function writeTransportData(array $data, array $output): array
     {
-        $output['data'] = $data->get();
+        foreach ($data as $serviceData) {
+            foreach ($serviceData->getActions() as $actionData) {
+                $output['data'][$serviceData->getAddress()][$serviceData->getName()][$serviceData->getVersion()][$actionData->getName()][] = $actionData->getData();
+            }
+        }
 
         return $output;
     }

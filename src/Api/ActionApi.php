@@ -234,15 +234,15 @@ class ActionApi extends Api implements Action
      * @param array $entity
      * @return Action
      * @throws TransportException
+     * @throws InvalidValueException
      */
     public function setEntity(array $entity): Action
     {
-        $type = $this->typeCatalog::TYPE_OBJECT;
-        if (!$this->typeCatalog->validate($type, $entity)) {
+        $actionData = $this->transport->setData($this->name, $this->version, $this->actionName, $entity);
+
+        if ($actionData->isCollection()) {
             throw new TransportException('Invalid Entity');
         }
-
-        $this->transport->setData($this->name, $this->version, $this->actionName, $entity);
 
         return $this;
     }
@@ -251,15 +251,15 @@ class ActionApi extends Api implements Action
      * @param array $collection
      * @return Action
      * @throws TransportException
+     * @throws InvalidValueException
      */
     public function setCollection(array $collection): Action
     {
-        $type = $this->typeCatalog::TYPE_ARRAY;
-        if (!$this->typeCatalog->validate($type, $collection)) {
+        $actionData = $this->transport->setData($this->name, $this->version, $this->actionName, $collection);
+
+        if (!$actionData->isCollection()) {
             throw new TransportException('Invalid Collection');
         }
-
-        $this->transport->setCollection($this->name, $this->version, $this->actionName, $collection);
 
         return $this;
     }

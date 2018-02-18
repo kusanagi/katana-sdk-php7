@@ -23,7 +23,9 @@ use Katana\Sdk\Api\RemoteCall;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\ActionData;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -33,6 +35,7 @@ use Katana\Sdk\Api\TransportMeta;
 use Katana\Sdk\Api\TransportRelations;
 use Katana\Sdk\Api\TransportTransactions;
 use Katana\Sdk\Api\Value\VersionString;
+use Katana\Sdk\Exception\InvalidValueException;
 
 class CompactTransportMapper implements TransportWriterInterface, TransportReaderInterface
 {
@@ -92,7 +95,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         if ($transport->getFiles()->getAll()) {
             $output = $this->writeTransportFiles($transport->getFiles(), $output);
         }
-        if ($transport->getData()->get()) {
+        if ($transport->getData()) {
             $output = $this->writeTransportData($transport->getData(), $output);
         }
         if ($transport->getRelations()->get()) {
@@ -273,28 +276,45 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportData
+     * @return ServiceData[]
+     * @throws InvalidValueException
      */
-    public function getTransportData(array $raw)
+    public function getTransportData(array $raw): array
     {
-        if (isset($raw['d'])) {
-            $data = $raw['d'];
-        } else {
-            $data = [];
+        if (!isset($raw['d'])) {
+            return [];
         }
 
-        return new TransportData($data);
+        $datas = [];
+
+        foreach ($raw['d'] as $address => $addressData) {
+            foreach ($addressData as $name => $serviceData) {
+                foreach ($serviceData as $version => $versionData) {
+                    $actionDatas = [];
+                    foreach ($versionData as $action => $actionData) {
+                        foreach ($actionData as $data) {
+                            $actionDatas[] = new ActionData($action, $data);
+                        }
+                    }
+                    $datas[] = new ServiceData($address, $name, $version, $actionDatas);
+                }
+            }
+        }
+
+        return $datas;
     }
 
     /**
-     * @param TransportData $data
+     * @param ServiceData[] $data
      * @param array $output
      * @return array
      */
-    public function writeTransportData(TransportData $data, array $output)
+    public function writeTransportData(array $data, array $output): array
     {
-        if ($data->get()) {
-            $output['d'] = $data->get();
+        foreach ($data as $serviceData) {
+            foreach ($serviceData->getActions() as $actionData) {
+                $output['d'][$serviceData->getAddress()][$serviceData->getName()][$serviceData->getVersion()][$actionData->getName()][] = $actionData->getData();
+            }
         }
 
         return $output;
@@ -359,10 +379,8 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
      */
     public function writeTransportLinks(array $links, array $output): array
     {
-        $links = [];
-
         foreach ($links as $link) {
-            $links[$link->getAddress()][$link->getName()][$link->getLink()] = $link->getUri();
+            $output['l'][$link->getAddress()][$link->getName()][$link->getLink()] = $link->getUri();
         }
 
         return $output;

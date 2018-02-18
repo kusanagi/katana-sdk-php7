@@ -17,7 +17,6 @@ namespace Katana\Sdk\Tests\Api;
 
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\TransportCalls;
-use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
 use Katana\Sdk\Api\TransportFiles;
 use Katana\Sdk\Api\TransportMeta;
@@ -37,13 +36,46 @@ class TransportTest extends TestCase
         $this->transport = new Transport(
             new TransportMeta('', '', '', '', [], 0, ['localhost', 'localhost'], [], 0),
             new TransportFiles(),
-            new TransportData(),
+            [],
             new TransportRelations(),
             [],
             new TransportCalls(),
             new TransportTransactions(),
             new TransportErrors()
         );
+    }
+
+    public function testData()
+    {
+        $transport = $this->transport;
+        $this->assertEquals([], $transport->getData());
+
+        $transport->setData('service1', '1.1.1', 'foo', [
+            'first' => 1,
+            'second' => true,
+        ]);
+        $this->assertCount(1, $transport->getData());
+
+        $serviceData = $transport->getData()[0];
+        $this->assertEquals('service1', $serviceData->getName());
+        $this->assertFalse($serviceData->getActions()[0]->isCollection());
+
+        $transport->setData('service2', '1.1.1', 'foo', [[
+            'first' => 1,
+            'second' => true,
+        ]]);
+        $this->assertCount(2, $transport->getData());
+
+        $transport->setData('service2', '1.1.1', 'foo', [
+            'first' => 1,
+            'second' => true,
+        ]);
+        $this->assertCount(2, $transport->getData());
+
+        $serviceData = $transport->getData()[1];
+        $this->assertCount(2, $serviceData->getActions());
+        $this->assertTrue($serviceData->getActions()[0]->isCollection());
+        $this->assertFalse($serviceData->getActions()[1]->isCollection());
     }
 
     public function testLinks()

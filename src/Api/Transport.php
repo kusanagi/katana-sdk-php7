@@ -15,8 +15,12 @@
 
 namespace Katana\Sdk\Api;
 
+use Katana\Sdk\Api\Transport\ActionData;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\Value\VersionString;
+use Katana\Sdk\Exception\InvalidValueException;
+use Katana\Sdk\Exception\TransportException;
 use Katana\Sdk\File as FileInterface;
 
 /**
@@ -42,9 +46,9 @@ class Transport
     private $files;
 
     /**
-     * @var TransportData
+     * @var ServiceData[]
      */
-    private $data;
+    private $data = [];
 
     /**
      * @var TransportRelations
@@ -81,7 +85,7 @@ class Transport
         return new Transport(
             new TransportMeta('', '', '', '', [], 0, '', [], 0),
             new TransportFiles([]),
-            new TransportData(),
+            [],
             new TransportRelations(),
             [],
             new TransportCalls(),
@@ -93,7 +97,7 @@ class Transport
     /**
      * @param TransportMeta $meta
      * @param TransportFiles $files
-     * @param TransportData $data
+     * @param ServiceData[] $data
      * @param TransportRelations $relations
      * @param Link[] $links
      * @param TransportCalls $calls
@@ -104,7 +108,7 @@ class Transport
     public function __construct(
         TransportMeta $meta,
         TransportFiles $files,
-        TransportData $data,
+        array $data,
         TransportRelations $relations,
         array $links,
         TransportCalls $calls,
@@ -159,9 +163,9 @@ class Transport
     }
 
     /**
-     * @return TransportData
+     * @return ServiceData[]
      */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
@@ -275,27 +279,51 @@ class Transport
     }
 
     /**
-     * @param string $service
+     * @param string $address
+     * @param string $name
      * @param string $version
-     * @param string $action
-     * @param array $data
-     * @return bool
+     * @return int
      */
-    public function setData($service, $version, $action, array $data)
+    private function findServiceData(string $address, string $name, string $version): int
     {
-        return $this->data->set($this->meta->getGateway()[1], $service, $version, $action, $data);
+        $match = array_filter(
+            $this->data,
+            function (ServiceData $serviceData) use ($address, $name, $version) {
+                return $serviceData->getAddress() === $address
+                    && $serviceData->getName() === $name
+                    && $serviceData->getVersion() === $version;
+            }
+        );
+
+        if ($match) {
+            return key($match);
+        } else {
+            return -1;
+        }
     }
 
     /**
      * @param string $service
      * @param string $version
      * @param string $action
-     * @param array $collection
-     * @return bool
+     * @param array $data
+     * @return ActionData
+     * @throws InvalidValueException
      */
-    public function setCollection($service, $version, $action, array $collection)
+    public function setData($service, $version, $action, array $data): ActionData
     {
-        return $this->data->set($this->meta->getGateway()[1], $service, $version, $action, $collection);
+        $actionData = new ActionData($action, $data);
+
+        $match = $this->findServiceData($this->meta->getGateway()[1], $service, $version);
+        if ($match >= 0) {
+            $dataActions =  $this->data[$match]->getActions();
+            $dataActions[] = $actionData;
+            $this->data[$match] = new ServiceData($this->meta->getGateway()[1], $service, $version, $dataActions);
+        } else {
+            $this->data[] = new ServiceData($this->meta->getGateway()[1], $service, $version, [$actionData]);
+        }
+
+        return $actionData;
     }
 
     /**

@@ -126,6 +126,25 @@
                                     }
                                 ]
                             }
+                        },
+                        "test_collection": {
+                            "1.2.3": {
+                                "new": [
+                                    [
+
+                                        {
+                                            "created": "2016-06-06T10:12:23.123Z",
+                                            "name": "fdafs",
+                                            "id": "qewr"
+                                        },
+                                        {
+                                            "created": "2016-06-06T10:12:23.123Z",
+                                            "name": "Clark",
+                                            "id": "gtgb"
+                                        }
+                                    ]
+                                ]
+                            }
                         }
                     }
                 },

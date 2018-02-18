@@ -16,6 +16,7 @@
 namespace Katana\Sdk;
 
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\ServiceData;
 
 /**
  * Interface to the Transport object contained in a payload
@@ -87,27 +88,9 @@ interface Transport
     /**
      * Return the data stored in the Transport
      *
-     * If the optional "service" argument is specified, only data stored under
-     * that service is returned
-     *
-     * If the optional "version" argument is specified, only data stored under
-     * that service and version is returned
-     *
-     * If the optional "action" argument is specified, only data stored under
-     * that service, version and action is returned
-     *
-     * @param string $address
-     * @param string $service
-     * @param string $version
-     * @param string $action
-     * @return array
+     * @return ServiceData[]
      */
-    public function getData(
-        string $address = '',
-        string $service = '',
-        string $version = '',
-        string $action = ''
-    );
+    public function getData(): array;
 
     /**
      * Return all the relations stored in the Transport
