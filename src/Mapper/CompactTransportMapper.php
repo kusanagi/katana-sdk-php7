@@ -24,7 +24,9 @@ use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
@@ -322,28 +324,46 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportRelations
+     * @return Relation[]
+     * @throws InvalidValueException
      */
-    public function getTransportRelations(array $raw)
+    public function getTransportRelations(array $raw): array
     {
-        if (isset($raw['r']) && (array) $raw['r']) {
-            $relations = $raw['r'];
-        } else {
-            $relations = [];
+        if (!isset($raw['r'])) {
+            return [];
         }
 
-        return new TransportRelations($relations);
+        $relations = [];
+
+        foreach ($raw['r'] as $addressFrom => $addressFromRelations) {
+            foreach ($addressFromRelations as $serviceFrom => $serviceFromRelations) {
+                foreach ($serviceFromRelations as $idFrom => $idFromRelations) {
+                    $fromRelations = [];
+                    foreach ($idFromRelations as $addressTo => $addressToRelations) {
+                        foreach ($addressToRelations as $serviceTo => $serviceToRelations) {
+                            $type = is_array($serviceToRelations) ? 'many' : 'one';
+                            $fromRelations[] = new ForeignRelation($addressTo, $serviceTo, $type, (array) $serviceToRelations);
+                        }
+                    }
+                    $relations[] = new Relation($addressFrom, $serviceFrom, $idFrom, $fromRelations);
+                }
+            }
+        }
+
+        return $relations;
     }
 
     /**
-     * @param TransportRelations $relations
+     * @param Relation[] $relations
      * @param array $output
      * @return array
      */
-    public function writeTransportRelations(TransportRelations $relations, array $output)
+    public function writeTransportRelations(array $relations, array $output): array
     {
-        if ($relations->get()) {
-            $output['r'] = $relations->get();
+        foreach ($relations as $r) {
+            foreach ($r->getForeignRelations() as $fr) {
+                $output['r'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getForeignKeys();
+            }
         }
 
         return $output;
@@ -573,6 +593,11 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         return $output;
     }
 
+    /**
+     * @param Transport $transport
+     * @param array $mergeData
+     * @throws InvalidValueException
+     */
     public function merge(Transport $transport, array $mergeData)
     {
         // Merge meta properties and fallbacks
@@ -592,53 +617,45 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         );
 
         // Merge data
+        $data = [];
         foreach ($mergeData['d'] ?? [] as $address => $aData) {
             foreach ($aData as $service => $sData) {
                 foreach ($sData as $version => $vData) {
+                    $actions = [];
                     foreach ($vData as $action => $data) {
-                        $transport->getData()->set(
-                            $address, $service, $version, $action, $data
-                        );
+                        $actions[] = new ActionData($action, $data);
                     }
+                    $data[] = new ServiceData($address, $service, $version, $actions);
                 }
             }
         }
 
         // Merge relations
-        $relations = $transport->getRelations()->get();
-        foreach ($mergeData['r'] ?? [] as $address1 => $a1Relations) {
-            foreach ($a1Relations as $service1 => $s1Relations) {
-                foreach ($s1Relations as $id1 => $i1Relations) {
-                    foreach ($i1Relations as $address2 => $a2Relations) {
-                        foreach ($a2Relations as $service2 => $s2Relations) {
-                            if (isset($relations[$address1][$service1][$id1][$address2][$service2])) {
-                                continue;
-                            }
-
-                            if (is_array($s2Relations)) {
-                                $transport->getRelations()->addMultipleRelation(
-                                    $address1,
-                                    $service1,
-                                    $id1,
-                                    $address2,
-                                    $service2,
-                                    $s2Relations
-                                );
-                            } else {
-                                $transport->getRelations()->addSimple(
-                                    $address1,
-                                    $service1,
-                                    $id1,
-                                    $address2,
-                                    $service2,
-                                    $s2Relations
-                                );
-                            }
+        $relations = [];
+        foreach ($mergeData['r'] ?? [] as $addressFrom => $addressFromRelations) {
+            foreach ($addressFromRelations as $serviceFrom => $serviceFromRelations) {
+                foreach ($serviceFromRelations as $idFrom => $idFromRelations) {
+                    $foreignRelations = [];
+                    foreach ($idFromRelations as $addressTo => $addressToRelations) {
+                        foreach ($addressToRelations as $serviceTo => $foreignKeys) {
+                            $foreignRelations[] = new ForeignRelation(
+                                $addressTo,
+                                $serviceTo,
+                                is_array($foreignKeys) ? 'many' : 'one',
+                                (array) $foreignKeys
+                            );
                         }
                     }
+                    $relations[] = new Relation(
+                        $addressFrom,
+                        $serviceFrom,
+                        $idFrom,
+                        $foreignRelations
+                    );
                 }
             }
         }
+        $transport->mergeRelations($relations);
 
         // Merge links
         $links = [];

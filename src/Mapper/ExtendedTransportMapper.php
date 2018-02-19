@@ -23,7 +23,9 @@ use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
@@ -34,6 +36,7 @@ use Katana\Sdk\Api\TransportMeta;
 use Katana\Sdk\Api\TransportRelations;
 use Katana\Sdk\Api\TransportTransactions;
 use Katana\Sdk\Api\Value\VersionString;
+use Katana\Sdk\Exception\InvalidValueException;
 
 class ExtendedTransportMapper implements TransportWriterInterface, TransportReaderInterface
 {
@@ -272,7 +275,7 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
     /**
      * @param array $raw
      * @return ServiceData[]
-     * @throws \Katana\Sdk\Exception\InvalidValueException
+     * @throws InvalidValueException
      */
     public function getTransportData(array $raw): array
     {
@@ -317,27 +320,47 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportRelations
+     * @return Relation[]
+     * @throws InvalidValueException
      */
-    public function getTransportRelations(array $raw)
+    public function getTransportRelations(array $raw): array
     {
-        if (isset($raw['relations'])) {
-            $relations = $raw['relations'];
-        } else {
-            $relations = [];
+        if (!isset($raw['relations'])) {
+            return [];
         }
 
-        return new TransportRelations($relations);
+        $relations = [];
+
+        foreach ($raw['relations'] as $addressFrom => $addressFromRelations) {
+            foreach ($addressFromRelations as $serviceFrom => $serviceFromRelations) {
+                foreach ($serviceFromRelations as $idFrom => $idFromRelations) {
+                    $fromRelations = [];
+                    foreach ($idFromRelations as $addressTo => $addressToRelations) {
+                        foreach ($addressToRelations as $serviceTo => $serviceToRelations) {
+                            $type = is_array($serviceToRelations) ? 'many' : 'one';
+                            $fromRelations[] = new ForeignRelation($addressTo, $serviceTo, $type, (array) $serviceToRelations);
+                        }
+                    }
+                    $relations[] = new Relation($addressFrom, $serviceFrom, $idFrom, $fromRelations);
+                }
+            }
+        }
+
+        return $relations;
     }
 
     /**
-     * @param TransportRelations $relations
+     * @param Relation[] $relations
      * @param array $output
      * @return array
      */
-    public function writeTransportRelations(TransportRelations $relations, array $output)
+    public function writeTransportRelations(array $relations, array $output): array
     {
-        $output['relations'] = $relations->get();
+        foreach ($relations as $r) {
+            foreach ($r->getForeignRelations() as $fr) {
+                $output['relations'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getForeignKeys();
+            }
+        }
 
         return $output;
     }

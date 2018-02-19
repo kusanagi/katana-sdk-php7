@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Transport as TransportInterface;
 use Katana\Sdk\File as FileInterface;
 
@@ -109,15 +110,11 @@ class TransportReader implements TransportInterface
     }
 
     /**
-     * @param string $address
-     * @param string $service
-     * @return array
+     * @return Relation[]
      */
-    public function getRelations(
-        string $address = '',
-        string $service = ''
-    ): array {
-        return $this->transport->getRelations()->get($address, $service);
+    public function getRelations(): array
+    {
+        return $this->transport->getRelations();
     }
 
     /**

@@ -18,6 +18,7 @@ namespace Katana\Sdk\Mapper;
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
@@ -62,9 +63,9 @@ interface TransportReaderInterface
 
     /**
      * @param array $raw
-     * @return TransportRelations
+     * @return Relation[]
      */
-    public function getTransportRelations(array $raw);
+    public function getTransportRelations(array $raw): array;
 
     /**
      * @param array $raw

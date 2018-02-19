@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Tests\Api;
 
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportErrors;
 use Katana\Sdk\Api\TransportFiles;
@@ -37,7 +38,7 @@ class TransportTest extends TestCase
             new TransportMeta('', '', '', '', [], 0, ['localhost', 'localhost'], [], 0),
             new TransportFiles(),
             [],
-            new TransportRelations(),
+            [],
             [],
             new TransportCalls(),
             new TransportTransactions(),
@@ -76,6 +77,39 @@ class TransportTest extends TestCase
         $this->assertCount(2, $serviceData->getActions());
         $this->assertTrue($serviceData->getActions()[0]->isCollection());
         $this->assertFalse($serviceData->getActions()[1]->isCollection());
+    }
+
+    public function testRelations()
+    {
+        $transport = $this->transport;
+        $this->assertEquals([], $transport->getRelations());
+
+        $transport->addSimpleRelation('serviceFrom', 'idFrom', 'serviceTo', 'idTo');
+        $this->assertCount(1, $transport->getRelations());
+
+        $transport->addMultipleRelation('serviceFrom', 'idFrom', 'serviceTo2', ['idTo1', 'idTo2']);
+        $this->assertCount(1, $transport->getRelations());
+
+        $transport->addSimpleRelation('serviceFrom2', 'idFrom2', 'serviceTo', 'idTo');
+        $this->assertCount(2, $transport->getRelations());
+
+        $relation = $transport->getRelations()[0];
+        $this->assertCount(2, $relation->getForeignRelations());
+        $this->assertContainsOnlyInstancesOf(ForeignRelation::class, $relation->getForeignRelations());
+
+        $foreignRelation = $relation->getForeignRelations()[0];
+        $this->assertEquals('serviceTo', $foreignRelation->getName());
+        $this->assertEquals('one', $foreignRelation->getType());
+        $this->assertEquals(['idTo'], $foreignRelation->getForeignKeys());
+
+        $foreignRelation = $relation->getForeignRelations()[1];
+        $this->assertEquals('serviceTo2', $foreignRelation->getName());
+        $this->assertEquals('many', $foreignRelation->getType());
+        $this->assertEquals(['idTo1', 'idTo2'], $foreignRelation->getForeignKeys());
+
+        $relation = $transport->getRelations()[1];
+        $this->assertCount(1, $relation->getForeignRelations());
+        $this->assertContainsOnlyInstancesOf(ForeignRelation::class, $relation->getForeignRelations());
     }
 
     public function testLinks()

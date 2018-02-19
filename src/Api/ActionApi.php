@@ -269,6 +269,7 @@ class ActionApi extends Api implements Action
      * @param string $service
      * @param string $foreignKey
      * @return Action
+     * @throws InvalidValueException
      */
     public function relateOne(
         string $primaryKey,
@@ -286,6 +287,7 @@ class ActionApi extends Api implements Action
      * @param string $service
      * @param array $foreignKeys
      * @return Action
+     * @throws InvalidValueException
      */
     public function relateMany(
         string $primaryKey,

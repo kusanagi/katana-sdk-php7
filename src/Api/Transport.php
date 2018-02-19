@@ -16,7 +16,9 @@
 namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Exception\InvalidValueException;
@@ -51,9 +53,9 @@ class Transport
     private $data = [];
 
     /**
-     * @var TransportRelations
+     * @var Relation[]
      */
-    private $relations;
+    private $relations = [];
 
     /**
      * @var Link[]
@@ -86,7 +88,7 @@ class Transport
             new TransportMeta('', '', '', '', [], 0, '', [], 0),
             new TransportFiles([]),
             [],
-            new TransportRelations(),
+            [],
             [],
             new TransportCalls(),
             new TransportTransactions(),
@@ -98,7 +100,7 @@ class Transport
      * @param TransportMeta $meta
      * @param TransportFiles $files
      * @param ServiceData[] $data
-     * @param TransportRelations $relations
+     * @param Relation[] $relations
      * @param Link[] $links
      * @param TransportCalls $calls
      * @param TransportTransactions $transactions
@@ -109,7 +111,7 @@ class Transport
         TransportMeta $meta,
         TransportFiles $files,
         array $data,
-        TransportRelations $relations,
+        array $relations,
         array $links,
         TransportCalls $calls,
         TransportTransactions $transactions,
@@ -171,9 +173,9 @@ class Transport
     }
 
     /**
-     * @return TransportRelations
+     * @return Relation[]
      */
-    public function getRelations()
+    public function getRelations(): array
     {
         return $this->relations;
     }
@@ -327,22 +329,106 @@ class Transport
     }
 
     /**
+     * @param ServiceData[] $data
+     */
+    public function mergeData(ServiceData ...$data)
+    {
+        foreach ($data as $serviceData) {
+            $match = $this->findServiceData($serviceData->getAddress(), $serviceData->getName(), $serviceData->getVersion());
+            if ($match === -1) {
+                $this->data[] = $serviceData;
+            } else {
+                $actions = array_merge($this->data[$match]->getActions(), $serviceData->getActions());
+                $this->data[$match] = new ServiceData(
+                    $serviceData->getAddress(),
+                    $serviceData->getName(),
+                    $serviceData->getVersion(),
+                    $actions
+                );
+            }
+        }
+    }
+
+    /**
+     * @param string $address
+     * @param string $name
+     * @param string $primaryKey
+     * @return int
+     */
+    private function findRelation(string $address, string $name, string $primaryKey): int
+    {
+        $match = array_filter(
+            $this->relations,
+            function (Relation $relation) use ($address, $name, $primaryKey) {
+                return $relation->getAddress() === $address
+                    && $relation->getName() === $name
+                    && $relation->getPrimaryKey() === $primaryKey;
+            }
+        );
+
+        if ($match) {
+            return key($match);
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * @param string $type
+     * @param string $serviceFrom
+     * @param string $idFrom
+     * @param string $serviceTo
+     * @param array $ids
+     * @return bool
+     * @throws InvalidValueException
+     */
+    private function addRelation(
+        string $type,
+        string $serviceFrom,
+        string $idFrom,
+        string $serviceTo,
+        array $ids
+    ): bool {
+        $foreignRelation = new ForeignRelation(
+            $this->meta->getGateway()[1],
+            $serviceTo,
+            $type,
+            $ids
+        );
+
+        $match = $this->findRelation($this->meta->getGateway()[1], $serviceFrom, $idFrom);
+        if ($match >= 0) {
+            $foreignRelations =  $this->relations[$match]->getForeignRelations();
+            $foreignRelations[] = $foreignRelation;
+            $this->relations[$match] = new Relation(
+                $this->meta->getGateway()[1],
+                $serviceFrom,
+                $idFrom,
+                $foreignRelations
+            );
+        } else {
+            $this->relations[] = new Relation(
+                $this->meta->getGateway()[1],
+                $serviceFrom,
+                $idFrom,
+                [$foreignRelation]
+            );
+        }
+
+        return true;
+    }
+
+    /**
      * @param string $serviceFrom
      * @param string $idFrom
      * @param string $serviceTo
      * @param string $idTo
      * @return bool
+     * @throws InvalidValueException
      */
-    public function addSimpleRelation($serviceFrom, $idFrom, $serviceTo, $idTo)
+    public function addSimpleRelation($serviceFrom, $idFrom, $serviceTo, $idTo): bool
     {
-        return $this->relations->addSimple(
-            $this->meta->getGateway()[1],
-            $serviceFrom,
-            $idFrom,
-            $this->meta->getGateway()[1],
-            $serviceTo,
-            $idTo
-        );
+        return $this->addRelation('one', $serviceFrom, $idFrom, $serviceTo, [$idTo]);
     }
 
     /**
@@ -351,17 +437,35 @@ class Transport
      * @param string $serviceTo
      * @param array $idsTo
      * @return bool
+     * @throws InvalidValueException
      */
-    public function addMultipleRelation($serviceFrom, $idFrom, $serviceTo, array $idsTo)
+    public function addMultipleRelation($serviceFrom, $idFrom, $serviceTo, array $idsTo): bool
     {
-        return $this->relations->addMultipleRelation(
-            $this->meta->getGateway()[1],
-            $serviceFrom,
-            $idFrom,
-            $this->meta->getGateway()[1],
-            $serviceTo,
-            $idsTo
-        );
+        return $this->addRelation('many', $serviceFrom, $idFrom, $serviceTo, $idsTo);
+    }
+
+    /**
+     * @param Relation[] $relations
+     */
+    public function mergeRelations(Relation ...$relations)
+    {
+        foreach ($relations as $relation) {
+            $match = $this->findRelation($relation->getAddress(), $relation->getName(), $relation->getPrimaryKey());
+            if ($match === -1) {
+                $this->relations[] = $relation;
+            } else {
+                $foreignRelations = array_merge(
+                    $this->relations[$match]->getForeignRelations(),
+                    $relation->getForeignRelations()
+                );
+                $this->relations[$match] = new Relation(
+                    $relation->getAddress(),
+                    $relation->getName(),
+                    $relation->getPrimaryKey(),
+                    $foreignRelations
+                );
+            }
+        }
     }
 
     /**
