@@ -22,6 +22,7 @@ use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -80,7 +81,7 @@ class CompactPayloadMapperTest extends TestCase
         $this->assertContainsOnlyInstancesOf(Relation::class, $transport->getRelations());
         $this->assertContainsOnlyInstancesOf(Link::class, $transport->getLinks());
         $this->assertContainsOnlyInstancesOf(Caller::class, $transport->getCalls());
-        $this->assertInstanceOf(TransportTransactions::class, $transport->getTransactions());
+        $this->assertContainsOnlyInstancesOf(Transaction::class, $transport->getTransactions());
         $this->assertInstanceOf(TransportErrors::class, $transport->getErrors());
         $this->assertInstanceOf(File::class, $transport->getBody());
     }

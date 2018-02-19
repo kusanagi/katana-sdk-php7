@@ -21,6 +21,7 @@ use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -73,12 +74,6 @@ interface TransportWriterInterface
     public function writeTransportData(array $data, array $output): array;
 
     /**
-     * @param array $raw
-     * @return Relation[]
-     */
-    public function getTransportRelations(array $raw): array;
-
-    /**
      * @param Relation[] $relations
      * @param array $output
      * @return array
@@ -100,11 +95,11 @@ interface TransportWriterInterface
     public function writeTransportCalls(array $calls, array $output): array;
 
     /**
-     * @param TransportTransactions $transactions
+     * @param Transaction[] $transactions
      * @param array $output
      * @return array
      */
-    public function writeTransportTransactions(TransportTransactions $transactions, array $output);
+    public function writeTransportTransactions(array $transactions, array $output): array;
 
     /**
      * @param TransportErrors $errors

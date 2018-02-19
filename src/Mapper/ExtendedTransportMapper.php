@@ -475,56 +475,51 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportTransactions
+     * @return Transaction[]
      */
-    public function getTransportTransactions(array $raw)
+    public function getTransportTransactions(array $raw): array
     {
-        if (isset($raw['transactions'])) {
-            $rawTransactions = $raw['transactions'];
-        } else {
-            $rawTransactions = [];
+        if (!isset($raw['transactions'])) {
+            return [];
         }
 
         $transactions = [];
-        foreach ($rawTransactions as $address => $addressTransactions) {
-            foreach ($addressTransactions as $type => $typeTransactions) {
-                $transactions += array_map(function ($transactionData) use ($address, $type) {
-                    return new Transaction(
-                        $type,
-                        new ServiceOrigin($transactionData['service'], $transactionData['version']),
-                        $transactionData['action'],
-                        $transactionData['callee'],
-                        isset($transactionData['params']) ? array_map([$this, 'getParam'], $transactionData['params']) : []
-                    );
-                }, $typeTransactions);
-            }
+        foreach ($raw['transactions'] as $type => $typeTransactions) {
+            $transactions = array_merge($transactions, array_map(function ($transactionData) use ($type) {
+                return new Transport\Transaction(
+                    $type,
+                    $transactionData['name'],
+                    $transactionData['version'],
+                    $transactionData['caller'],
+                    $transactionData['action'],
+                    isset($transactionData['params']) ? array_map([$this, 'getParam'], $transactionData['params']) : []
+                );
+            }, $typeTransactions));
         }
 
-        return new TransportTransactions($transactions);
+        return $transactions;
     }
 
     /**
-     * @param TransportTransactions $transactions
+     * @param Transaction[] $transactions
      * @param array $output
      * @return array
      */
-    public function writeTransportTransactions(TransportTransactions $transactions, array $output)
+    public function writeTransportTransactions(array $transactions, array $output): array
     {
-        foreach ($transactions->get() as $transaction) {
+        foreach ($transactions as $transaction) {
             $transactionData = [
-                'service' => $transaction->getOrigin()->getName(),
-                'version' => $transaction->getOrigin()->getVersion(),
-                'action' => $transaction->getAction(),
-                'callee' => $transaction->getCallee(),
+                'name' => $transaction->getName(),
+                'version' => $transaction->getVersion(),
+                'caller' => $transaction->getCallerAction(),
+                'action' => $transaction->getCalleeAction(),
             ];
 
             if ($transaction->getParams()) {
                 $transactionData['params'] = array_map([$this, 'writeParam'], $transaction->getParams());
             }
 
-            $type = $transaction->getType();
-
-            $output['transactions'][$transaction->getOrigin()->getName()][$type][] = $transactionData;
+            $output['t'][$transaction->getType()][] = $transactionData;
         }
 
         return $output;

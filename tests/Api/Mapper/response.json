@@ -17,7 +17,7 @@
                                 "n": "test",
                                 "v": "0.1.0",
                                 "a": "rollback",
-                                "c": "update",
+                                "C": "update",
                                 "p": [
                                     {
                                         "t": "string",
@@ -31,12 +31,12 @@
                                 "n": "test",
                                 "v": "0.1.0",
                                 "a": "rollfront",
-                                "c": "update"
+                                "C": "update"
                             },
                             {
                                 "n": "test",
                                 "v": "0.1.0",
-                                "c": "update",
+                                "C": "update",
                                 "p": [
                                     {
                                         "t": "string",

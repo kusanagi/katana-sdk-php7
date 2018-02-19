@@ -18,6 +18,7 @@ namespace Katana\Sdk\Tests\Api;
 use Katana\Sdk\Api\DeferCall;
 use Katana\Sdk\Api\RemoteCall;
 use Katana\Sdk\Api\ServiceOrigin;
+use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\TransportCalls;
@@ -44,7 +45,7 @@ class TransportTest extends TestCase
             [],
             [],
             [],
-            new TransportTransactions(),
+            [],
             new TransportErrors()
         );
     }
@@ -182,5 +183,28 @@ class TransportTest extends TestCase
 
         $call = $transport->getCalls()[1];
         $this->assertTrue($call->getCallee()->isRemote());
+    }
+
+    public function testTransactions()
+    {
+        $transport = $this->transport;
+        $this->assertFalse($transport->hasTransactions());
+        $this->assertEquals([], $transport->getTransactions());
+
+        $origin = $this->prophesize(ServiceOrigin::class);
+        $origin->getName()->willReturn('origin name');
+        $origin->getVersion()->willReturn('origin version');
+
+        $transaction = $this->prophesize(Transaction::class);
+        $transaction->getType()->willReturn('commit');
+        $transaction->getOrigin()->willReturn($origin->reveal());
+        $transaction->getAction()->willReturn('action');
+        $transaction->getCallee()->willReturn('callee');
+        $transaction->getParams()->willReturn([]);
+
+        $transport->addTransaction($transaction->reveal());
+        $this->assertTrue($transport->hasTransactions());
+        $this->assertCount(1, $transport->getTransactions());
+        $this->assertContainsOnlyInstancesOf(Transport\Transaction::class, $transport->getTransactions());
     }
 }

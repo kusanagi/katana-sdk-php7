@@ -19,6 +19,7 @@ use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 
 /**
  * Interface to the Transport object contained in a payload
@@ -116,15 +117,12 @@ interface Transport
     public function getCalls(): array;
 
     /**
-     * Return all the transactions stored in the Transport
+     * Return all the transactions of one type stored in the Transport
      *
-     * If the optional "service" argument is specified, only transactions under
-     * that service are returned
-     *
-     * @param string $service
-     * @return array
+     * @param string $type Type of transactions to get
+     * @return Transaction[]
      */
-    public function getTransactions(string $service = ''): array;
+    public function getTransactions(string $type): array;
 
     /**
      * Return all the errors stored in the Transport

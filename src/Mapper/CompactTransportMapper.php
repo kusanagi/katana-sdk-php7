@@ -112,7 +112,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         if ($transport->getCalls()) {
             $output = $this->writeTransportCalls($transport->getCalls(), $output);
         }
-        if ($transport->getTransactions()->get()) {
+        if ($transport->getTransactions()) {
             $output = $this->writeTransportTransactions($transport->getTransactions(), $output);
         }
         if ($transport->getErrors()->get()) {
@@ -478,18 +478,16 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportTransactions
+     * @return Transport\Transaction[]
      */
-    public function getTransportTransactions(array $raw)
+    public function getTransportTransactions(array $raw): array
     {
-        if (isset($raw['t'])) {
-            $rawTransactions = $raw['t'];
-        } else {
-            $rawTransactions = [];
+        if (!isset($raw['t'])) {
+            return [];
         }
 
         $transactions = [];
-        foreach ($rawTransactions as $type => $typeTransactions) {
+        foreach ($raw['t'] as $type => $typeTransactions) {
             $transactions = array_merge($transactions, array_map(function ($transactionData) use ($type) {
                 $type = [
                     'c' => 'commit',
@@ -497,32 +495,33 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                     'C' => 'complete',
                 ][$type];
 
-                return new Transaction(
+                return new Transport\Transaction(
                     $type,
-                    new ServiceOrigin($transactionData['n'], $transactionData['v']),
+                    $transactionData['n'],
+                    $transactionData['v'],
+                    $transactionData['C'],
                     $transactionData['a'],
-                    $transactionData['c'],
                     isset($transactionData['p']) ? array_map([$this, 'getParam'], $transactionData['p']) : []
                 );
             }, $typeTransactions));
         }
 
-        return new TransportTransactions($transactions);
+        return $transactions;
     }
 
     /**
-     * @param TransportTransactions $transactions
+     * @param Transport\Transaction[] $transactions
      * @param array $output
      * @return array
      */
-    public function writeTransportTransactions(TransportTransactions $transactions, array $output)
+    public function writeTransportTransactions(array $transactions, array $output): array
     {
-        foreach ($transactions->get() as $transaction) {
+        foreach ($transactions as $transaction) {
             $transactionData = [
-                's' => $transaction->getOrigin()->getName(),
-                'v' => $transaction->getOrigin()->getVersion(),
-                'a' => $transaction->getAction(),
-                'c' => $transaction->getCallee(),
+                's' => $transaction->getName(),
+                'v' => $transaction->getVersion(),
+                'C' => $transaction->getCallerAction(),
+                'a' => $transaction->getCalleeAction(),
             ];
 
             if ($transaction->getParams()) {

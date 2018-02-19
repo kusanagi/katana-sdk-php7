@@ -316,6 +316,7 @@ class ActionApi extends Api implements Action
      * @param string $action
      * @param array $params
      * @return Action
+     * @throws InvalidValueException
      */
     public function commit(string $action, array $params = []): Action
     {
@@ -336,6 +337,7 @@ class ActionApi extends Api implements Action
      * @param string $action
      * @param array $params
      * @return Action
+     * @throws InvalidValueException
      */
     public function rollback(string $action, array $params = []): Action
     {
@@ -356,6 +358,7 @@ class ActionApi extends Api implements Action
      * @param string $action
      * @param array $params
      * @return Action
+     * @throws InvalidValueException
      */
     public function complete(string $action, array $params = []): Action
     {
@@ -380,6 +383,8 @@ class ActionApi extends Api implements Action
      * @param array $files
      * @param int $timeout
      * @return mixed
+     * @throws InvalidValueException
+     * @throws \Katana\Sdk\Exception\RuntimeCallException
      */
     public function call(
         string $service,
@@ -416,6 +421,7 @@ class ActionApi extends Api implements Action
      * @param File[] $files
      * @return Action
      * @throws InvalidValueException
+     * @throws SchemaException
      */
     public function deferCall(
         string $service,
@@ -472,6 +478,7 @@ class ActionApi extends Api implements Action
      * @param int $timeout
      * @return Action
      * @throws InvalidValueException
+     * @throws SchemaException
      */
     public function remoteCall(
         string $address,

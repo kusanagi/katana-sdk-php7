@@ -134,12 +134,12 @@ class TransportReader implements TransportInterface
     }
 
     /**
-     * @param string $service
+     * @param string $type
      * @return array
      */
-    public function getTransactions(string $service = ''): array
+    public function getTransactions(string $type): array
     {
-        return $this->transport->getTransactions()->getArray($service);
+        return $this->transport->getTransactions($type);
     }
 
     /**

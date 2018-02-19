@@ -21,6 +21,7 @@ use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -82,9 +83,9 @@ interface TransportReaderInterface
 
     /**
      * @param array $raw
-     * @return TransportTransactions
+     * @return Transaction[]
      */
-    public function getTransportTransactions(array $raw);
+    public function getTransportTransactions(array $raw): array;
 
     /**
      * @param array $raw

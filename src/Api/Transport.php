@@ -22,6 +22,7 @@ use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Exception\InvalidValueException;
 use Katana\Sdk\File as FileInterface;
@@ -66,12 +67,12 @@ class Transport
     /**
      * @var Caller[]
      */
-    private $calls;
+    private $calls = [];
 
     /**
-     * @var TransportTransactions
+     * @var Transaction[]
      */
-    private $transactions;
+    private $transactions = [];
 
     /**
      * @var TransportErrors
@@ -92,7 +93,7 @@ class Transport
             [],
             [],
             [],
-            new TransportTransactions(),
+            [],
             new TransportErrors()
         );
     }
@@ -104,7 +105,7 @@ class Transport
      * @param Relation[] $relations
      * @param Link[] $links
      * @param Caller[] $calls
-     * @param TransportTransactions $transactions
+     * @param Transaction[] $transactions
      * @param TransportErrors $errors
      * @param FileInterface|null $body
      */
@@ -115,7 +116,7 @@ class Transport
         array $relations,
         array $links,
         array $calls,
-        TransportTransactions $transactions,
+        array $transactions,
         TransportErrors $errors,
         FileInterface $body = null
     ) {
@@ -210,13 +211,13 @@ class Transport
      */
     public function hasTransactions()
     {
-        return $this->transactions->has();
+        return count($this->transactions) > 0;
     }
 
     /**
-     * @return TransportTransactions
+     * @return Transaction[]
      */
-    public function getTransactions()
+    public function getTransactions(): array
     {
         return $this->transactions;
     }
@@ -531,12 +532,22 @@ class Transport
     }
 
     /**
-     * @param Transaction $transaction
+     * @param \Katana\Sdk\Api\Transaction $transaction
      * @return bool
+     * @throws InvalidValueException
      */
-    public function addTransaction(Transaction $transaction)
+    public function addTransaction(\Katana\Sdk\Api\Transaction $transaction): bool
     {
-        return $this->transactions->add($transaction);
+        $this->transactions[] = new Transaction(
+            $transaction->getType(),
+            $transaction->getOrigin()->getName(),
+            $transaction->getOrigin()->getVersion(),
+            $transaction->getAction(),
+            $transaction->getCallee(),
+            $transaction->getParams()
+        );
+
+        return true;
     }
 
     /**
