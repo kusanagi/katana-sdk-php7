@@ -172,14 +172,6 @@ class ActionSchema
     }
 
     /**
-     * @return string
-     */
-    public function getPrimaryKey()
-    {
-        return $this->entity->getPrimaryKey();
-    }
-
-    /**
      * @param array $data
      * @return array
      * @throws SchemaException
