@@ -24,6 +24,8 @@ use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\Callee;
+use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
@@ -67,6 +69,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             't' => $param->getType(),
         ];
     }
+
     /**
      * @param array $raw
      * @return Transport
@@ -100,13 +103,13 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         if ($transport->getData()) {
             $output = $this->writeTransportData($transport->getData(), $output);
         }
-        if ($transport->getRelations()->get()) {
+        if ($transport->getRelations()) {
             $output = $this->writeTransportRelations($transport->getRelations(), $output);
         }
         if ($transport->getLinks()) {
             $output = $this->writeTransportLinks($transport->getLinks(), $output);
         }
-        if ($transport->getCalls()->get()) {
+        if ($transport->getCalls()) {
             $output = $this->writeTransportCalls($transport->getCalls(), $output);
         }
         if ($transport->getTransactions()->get()) {
@@ -408,64 +411,66 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportCalls
+     * @return Caller[]
      */
-    public function getTransportCalls(array $raw)
+    public function getTransportCalls(array $raw): array
     {
-        if (isset($raw['C']) && (array) $raw['C']) {
-            $rawCalls = $raw['C'];
-        } else {
-            $rawCalls = [];
+        if (!isset($raw['C'])) {
+            return [];
         }
 
         $calls = [];
-        foreach ($rawCalls as $service => $serviceCalls) {
+        foreach ($raw['C'] as $service => $serviceCalls) {
             foreach ($serviceCalls as $version => $versionCalls) {
                 $calls += array_map(function (array $callData) use ($service, $version) {
-                    return new DeferCall(
-                        new ServiceOrigin($service, $version),
+                    return new Caller(
+                        $service,
+                        $version,
                         $callData['C'],
-                        $callData['n'],
-                        new VersionString($callData['v']),
-                        $callData['a'],
-                        $callData['D'] ?? 0,
-                        isset($callData['p'])? array_map([$this, 'getParam'], $callData['p']) : []
+                        new Callee(
+                            $callData['D'] ?? 0,
+                            isset($callData['g']),
+                            $callData['g'] ?? '',
+                            $callData['n'],
+                            $callData['v'],
+                            $callData['a'],
+                            isset($callData['p'])? array_map([$this, 'getParam'], $callData['p']) : []
+                        )
                     );
                 }, $versionCalls);
             }
         }
 
-        return new TransportCalls($calls);
+        return $calls;
     }
 
     /**
-     * @param TransportCalls $calls
+     * @param Caller[] $calls
      * @param array $output
      * @return array
      */
-    public function writeTransportCalls(TransportCalls $calls, array $output)
+    public function writeTransportCalls(array $calls, array $output): array
     {
-        foreach ($calls->get() as $call) {
+        foreach ($calls as $caller) {
+            $callee = $caller->getCallee();
             $callData = [
-                'n' => $call->getService(),
-                'v' => $call->getVersion(),
-                'a' => $call->getAction(),
-                'D' => $call->getDuration(),
-                'C' => $call->getCaller(),
+                'n' => $callee->getName(),
+                'v' => $callee->getVersion(),
+                'a' => $callee->getAction(),
+                'D' => $callee->getDuration(),
+                'C' => $caller->getAction(),
             ];
 
-            if ($call instanceof RemoteCall) {
-                $callData['g'] = $call->getAddress();
-                $callData['t'] = $call->getTimeout();
+            if ($callee->isRemote()) {
+                $callData['g'] = $callee->getAddress();
+                $callData['t'] = $caller->getTimeout();
             }
 
-            if ($call->getParams()) {
-                $callData['p'] = array_map([$this, 'writeParam'], $call->getParams());
-            } else {
-                $callData['p'] = [];
+            if ($callee->getParams()) {
+                $callData['p'] = array_map([$this, 'writeParam'], $callee->getParams());
             }
 
-            $output['C'][$call->getOrigin()->getName()][$call->getOrigin()->getVersion()][] = $callData;
+            $output['C'][$caller->getName()][$caller->getVersion()][] = $callData;
         }
 
         return $output;
@@ -655,7 +660,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                 }
             }
         }
-        $transport->mergeRelations($relations);
+        $transport->mergeRelations(...$relations);
 
         // Merge links
         $links = [];

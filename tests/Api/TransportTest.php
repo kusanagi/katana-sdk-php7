@@ -15,6 +15,9 @@
 
 namespace Katana\Sdk\Tests\Api;
 
+use Katana\Sdk\Api\DeferCall;
+use Katana\Sdk\Api\RemoteCall;
+use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\TransportCalls;
@@ -40,7 +43,7 @@ class TransportTest extends TestCase
             [],
             [],
             [],
-            new TransportCalls(),
+            [],
             new TransportTransactions(),
             new TransportErrors()
         );
@@ -134,5 +137,50 @@ class TransportTest extends TestCase
         $link = $transport->getLinks()[0];
         $this->assertEquals($link->getLink(), 'self');
         $this->assertEquals($link->getUri(), 'http://example.com/3');
+    }
+
+    public function testCalls()
+    {
+        $transport = $this->transport;
+        $this->assertFalse($transport->hasCalls());
+        $this->assertEquals([], $transport->getCalls());
+
+        $origin = $this->prophesize(ServiceOrigin::class);
+        $origin->getName()->willReturn('origin name');
+        $origin->getVersion()->willReturn('origin version');
+
+        $call = $this->prophesize(DeferCall::class);
+        $call->getService()->willReturn('service');
+        $call->getVersion()->willReturn('version');
+        $call->getAction()->willReturn('action');
+        $call->getCaller()->willReturn('caller');
+        $call->getParams()->willReturn([]);
+        $call->getOrigin()->willReturn($origin->reveal());
+        $call->getDuration()->willReturn(42);
+
+        $transport->addCall($call->reveal());
+        $this->assertTrue($transport->hasCalls());
+        $this->assertCount(1, $transport->getCalls());
+
+        $call = $transport->getCalls()[0];
+        $this->assertFalse($call->getCallee()->isRemote());
+
+        $remoteCall = $this->prophesize(RemoteCall::class);
+        $remoteCall->getAddress()->willReturn('address');
+        $remoteCall->getService()->willReturn('service');
+        $remoteCall->getVersion()->willReturn('version');
+        $remoteCall->getAction()->willReturn('action');
+        $remoteCall->getCaller()->willReturn('caller');
+        $remoteCall->getParams()->willReturn([]);
+        $remoteCall->getOrigin()->willReturn($origin->reveal());
+        $remoteCall->getTimeout()->willReturn(1000);
+        $remoteCall->getDuration()->willReturn(42);
+
+        $transport->addCall($remoteCall->reveal());
+        $this->assertTrue($transport->hasCalls());
+        $this->assertCount(2, $transport->getCalls());
+
+        $call = $transport->getCalls()[1];
+        $this->assertTrue($call->getCallee()->isRemote());
     }
 }

@@ -16,13 +16,14 @@
 namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\Callee;
+use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Exception\InvalidValueException;
-use Katana\Sdk\Exception\TransportException;
 use Katana\Sdk\File as FileInterface;
 
 /**
@@ -63,7 +64,7 @@ class Transport
     private $links = [];
 
     /**
-     * @var TransportCalls
+     * @var Caller[]
      */
     private $calls;
 
@@ -90,7 +91,7 @@ class Transport
             [],
             [],
             [],
-            new TransportCalls(),
+            [],
             new TransportTransactions(),
             new TransportErrors()
         );
@@ -102,7 +103,7 @@ class Transport
      * @param ServiceData[] $data
      * @param Relation[] $relations
      * @param Link[] $links
-     * @param TransportCalls $calls
+     * @param Caller[] $calls
      * @param TransportTransactions $transactions
      * @param TransportErrors $errors
      * @param FileInterface|null $body
@@ -113,7 +114,7 @@ class Transport
         array $data,
         array $relations,
         array $links,
-        TransportCalls $calls,
+        array $calls,
         TransportTransactions $transactions,
         TransportErrors $errors,
         FileInterface $body = null
@@ -183,7 +184,7 @@ class Transport
     /**
      * @return Link[]
      */
-    public function getLinks()
+    public function getLinks(): array
     {
         return $this->links;
     }
@@ -191,15 +192,15 @@ class Transport
     /**
      * @return bool
      */
-    public function hasCalls()
+    public function hasCalls(): bool
     {
-        return $this->calls->has();
+        return count($this->calls) > 0;
     }
 
     /**
-     * @return TransportCalls
+     * @return Caller[]
      */
-    public function getCalls()
+    public function getCalls(): array
     {
         return $this->calls;
     }
@@ -544,7 +545,30 @@ class Transport
      */
     public function addCall(AbstractCall $call)
     {
-        return $this->calls->add($call);
+        if ($call instanceof RemoteCall) {
+            $calleeAddress = $call->getAddress();
+            $timeout = $call->getTimeout();
+        } else {
+            $calleeAddress = '';
+            $timeout = 0;
+        }
+
+        $this->calls[] = new Caller(
+            $call->getOrigin()->getName(),
+            $call->getOrigin()->getVersion(),
+            $call->getCaller(),
+            new Callee(
+                $timeout,
+                $call->getDuration(),
+                $calleeAddress,
+                $call->getService(),
+                $call->getVersion(),
+                $call->getAction(),
+                $call->getParams()
+            )
+        );
+
+        return true;
     }
 
     /**

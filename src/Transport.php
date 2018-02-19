@@ -15,6 +15,7 @@
 
 namespace Katana\Sdk;
 
+use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
@@ -110,13 +111,9 @@ interface Transport
     /**
      * Return all the calls stored in the Transport
      *
-     * If the optional "service" argument is specified, only calls under that
-     * service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Caller[]
      */
-    public function getCalls(string $service = ''): array;
+    public function getCalls(): array;
 
     /**
      * Return all the transactions stored in the Transport

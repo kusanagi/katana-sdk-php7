@@ -23,6 +23,8 @@ use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
 use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\Callee;
+use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
@@ -107,7 +109,7 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
         if ($transport->getLinks()) {
             $output = $this->writeTransportLinks($transport->getLinks(), $output);
         }
-        if ($transport->getCalls()->get()) {
+        if ($transport->getCalls()) {
             $output = $this->writeTransportCalls($transport->getCalls(), $output);
         }
         if ($transport->getTransactions()->get()) {
@@ -406,59 +408,66 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportCalls
+     * @return Caller[]
      */
-    public function getTransportCalls(array $raw)
+    public function getTransportCalls(array $raw): array
     {
-        if (isset($raw['calls'])) {
-            $rawCalls = $raw['calls'];
-        } else {
-            $rawCalls = [];
+        if (!isset($raw['calls'])) {
+            return [];
         }
 
         $calls = [];
-        foreach ($rawCalls as $address => $addressCalls) {
-            foreach ($addressCalls as $service => $serviceCalls) {
-                foreach ($serviceCalls as $version => $versionCalls) {
-                    $calls += array_map(function (array $callData) use ($address, $service, $version) {
-                        return new DeferCall(
-                            new ServiceOrigin($service, $version),
-                            $callData['caller'],
+        foreach ($raw['calls'] as $service => $serviceCalls) {
+            foreach ($serviceCalls as $version => $versionCalls) {
+                $calls += array_map(function (array $callData) use ($service, $version) {
+                    return new Caller(
+                        $service,
+                        $version,
+                        $callData['caller'],
+                        new Callee(
+                            $callData['duration'] ?? 0,
+                            isset($callData['gateway']),
+                            $callData['gateway'] ?? '',
                             $callData['name'],
-                            new VersionString($callData['version']),
+                            $callData['version'],
                             $callData['action'],
-                            $callData['duration'],
                             isset($callData['params'])? array_map([$this, 'getParam'], $callData['params']) : []
-                        );
-                    }, $versionCalls);
-                }
+                        )
+                    );
+                }, $versionCalls);
             }
         }
 
-        return new TransportCalls($calls);
+        return $calls;
     }
 
     /**
-     * @param TransportCalls $calls
+     * @param Caller[] $calls
      * @param array $output
      * @return array
      */
-    public function writeTransportCalls(TransportCalls $calls, array $output)
+    public function writeTransportCalls(array $calls, array $output): array
     {
-        foreach ($calls->get() as $call) {
+        foreach ($calls as $caller) {
+            $callee = $caller->getCallee();
             $callData = [
-                'name' => $call->getService(),
-                'version' => $call->getVersion(),
-                'action' => $call->getAction(),
-                'duration' => $call->getDuration(),
-                'caller' => $call->getCaller(),
+                'name' => $callee->getName(),
+                'version' => $callee->getVersion(),
+                'action' => $callee->getAction(),
+                'duration' => $callee->getDuration(),
+                'caller' => $caller->getAction(),
             ];
 
-            if ($call->getParams()) {
-                $callData['params'] = array_map([$this, 'writeParam'], $call->getParams());
+            if ($callee->isRemote()) {
+                $callData['gateway'] = $callee->getAddress();
+                $callData['timeout'] = $caller->getTimeout();
             }
 
-            $output['calls'][$call->getOrigin()->getName()][$call->getOrigin()->getVersion()][] = $callData;
+            if ($callee->getParams()) {
+                $callData['params'] = array_map([$this, 'writeParam'], $callee->getParams());
+            }
+
+            $output['calls'][$caller->getName()][$caller->getVersion()][] = $callData;
         }
 
         return $output;

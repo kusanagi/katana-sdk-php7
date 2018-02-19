@@ -15,6 +15,7 @@
 
 namespace Katana\Sdk\Api;
 
+use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Transport as TransportInterface;
@@ -125,12 +126,11 @@ class TransportReader implements TransportInterface
     }
 
     /**
-     * @param string $service
-     * @return array
+     * @return Caller[]
      */
-    public function getCalls(string $service = ''): array
+    public function getCalls(): array
     {
-        return $this->transport->getCalls()->getArray($service);
+        return $this->transport->getCalls();
     }
 
     /**

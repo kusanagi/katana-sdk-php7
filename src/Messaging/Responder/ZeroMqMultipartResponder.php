@@ -20,6 +20,7 @@ use Katana\Sdk\Api\Api;
 use Katana\Sdk\Api\Mapper\PayloadWriterInterface;
 use Katana\Sdk\Api\RequestApi;
 use Katana\Sdk\Api\ResponseApi;
+use Katana\Sdk\Api\Transport\Caller;
 use Katana\Sdk\Exception\ResponderException;
 use Katana\Sdk\Messaging\MessagePackSerializer;
 use MessagePack\Exception\PackingFailedException;
@@ -75,8 +76,11 @@ class ZeroMqMultipartResponder implements ResponderInterface
         $payload = $this->serializer->serialize($message);
 
         $controlString = '';
-        $transportCalls = $action->getTransport()->getCalls()->getArray($action->getName());
-        if (isset($transportCalls[$action->getVersion()])) {
+        $serviceCalls = array_filter($action->getTransport()->getCalls(), function (Caller $caller) use ($action) {
+            return $action->getName() === $caller->getName()
+                && $action->getVersion() === $caller->getVersion();
+        });
+        if (count($serviceCalls) > 0) {
             $controlString .= "\x01";
         }
 
