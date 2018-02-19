@@ -46,7 +46,7 @@ class TransportTest extends TestCase
             [],
             [],
             [],
-            new TransportErrors()
+            []
         );
     }
 
@@ -206,5 +206,23 @@ class TransportTest extends TestCase
         $this->assertTrue($transport->hasTransactions());
         $this->assertCount(1, $transport->getTransactions());
         $this->assertContainsOnlyInstancesOf(Transport\Transaction::class, $transport->getTransactions());
+    }
+
+    public function testErrors()
+    {
+        $transport = $this->transport;
+        $this->assertEquals([], $transport->getErrors());
+
+        $transport->addError(new Transport\Error(
+            'address',
+            'name',
+            'version',
+            'message',
+            1,
+            'status'
+        ));
+        $this->assertCount(1, $transport->getErrors());
+        $this->assertContainsOnlyInstancesOf(Transport\Error::class, $transport->getErrors());
+
     }
 }

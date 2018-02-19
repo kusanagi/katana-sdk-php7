@@ -102,9 +102,9 @@ interface TransportWriterInterface
     public function writeTransportTransactions(array $transactions, array $output): array;
 
     /**
-     * @param TransportErrors $errors
+     * @param Transport\Error[] $errors
      * @param array $output
      * @return array
      */
-    public function writeTransportErrors(TransportErrors $errors, array $output);
+    public function writeTransportErrors(array $errors, array $output): array;
 }

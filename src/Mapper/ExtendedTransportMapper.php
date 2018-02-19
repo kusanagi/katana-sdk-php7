@@ -527,42 +527,43 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportErrors
+     * @return Transport\Error[]
      */
-    public function getTransportErrors(array $raw)
+    public function getTransportErrors(array $raw): array
     {
-        if (isset($raw['errors'])) {
-            $rawErrors = $raw['errors'];
-        } else {
-            $rawErrors = [];
+        if (!isset($raw['errors'])) {
+            return [];
         }
 
         $errors = [];
-        foreach ($rawErrors as $service => $serviceErrors) {
-            foreach ($serviceErrors as $version => $versionErrors) {
-                $errors += array_map(function ($errorData) use ($service, $version) {
-                    return new Error(
-                        $service,
-                        $version,
-                        $errorData['message'],
-                        $errorData['code'],
-                        $errorData['status']
-                    );
-                }, $versionErrors);
+        foreach ($raw['errors'] as $address => $addressErrors) {
+            foreach ($addressErrors as $service => $serviceErrors) {
+                foreach ($serviceErrors as $version => $versionErrors) {
+                    $errors += array_map(function ($errorData) use ($address, $service, $version) {
+                        return new Transport\Error(
+                            $address,
+                            $service,
+                            $version,
+                            $errorData['message'],
+                            $errorData['code'],
+                            $errorData['status']
+                        );
+                    }, $versionErrors);
+                }
             }
         }
 
-        return new TransportErrors($errors);
+        return $errors;
     }
 
     /**
-     * @param TransportErrors $errors
+     * @param Error[] $errors
      * @param array $output
      * @return array
      */
-    public function writeTransportErrors(TransportErrors $errors, array $output)
+    public function writeTransportErrors(array $errors, array $output): array
     {
-        foreach ($errors->get() as $error) {
+        foreach ($errors as $error) {
             $errorData = [];
             if ($error->getMessage()) {
                 $errorData['message'] = $error->getMessage();

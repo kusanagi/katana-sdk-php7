@@ -16,6 +16,7 @@
 namespace Katana\Sdk;
 
 use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Error;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Api\Transport\ServiceData;
@@ -126,12 +127,7 @@ interface Transport
 
     /**
      * Return all the errors stored in the Transport
-     *
-     * If the optional "service" argument is specified, only errors under
-     * that service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Error[]
      */
-    public function getErrors(string $service = ''): array;
+    public function getErrors(): array;
 }

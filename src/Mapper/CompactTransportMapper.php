@@ -115,7 +115,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         if ($transport->getTransactions()) {
             $output = $this->writeTransportTransactions($transport->getTransactions(), $output);
         }
-        if ($transport->getErrors()->get()) {
+        if ($transport->getErrors()) {
             $output = $this->writeTransportErrors($transport->getErrors(), $output);
         }
         if ($transport->hasBody()) {
@@ -542,22 +542,20 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportErrors
+     * @return Error[]
      */
-    public function getTransportErrors(array $raw)
+    public function getTransportErrors(array $raw): array
     {
-        if (isset($raw['e'])) {
-            $rawErrors = $raw['e'];
-        } else {
-            $rawErrors = [];
+        if (!isset($raw['e'])) {
+            return [];
         }
 
         $errors = [];
-        foreach ($rawErrors as $address => $addressErrors) {
+        foreach ($raw['e'] as $address => $addressErrors) {
             foreach ($addressErrors as $service => $serviceErrors) {
                 foreach ($serviceErrors as $version => $versionErrors) {
                     $errors += array_map(function ($errorData) use ($address, $service, $version) {
-                        return new Error(
+                        return new Transport\Error(
                             $address,
                             $service,
                             $version,
@@ -570,17 +568,17 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             }
         }
 
-        return new TransportErrors($errors);
+        return $errors;
     }
 
     /**
-     * @param TransportErrors $errors
+     * @param Transport\Error[] $errors
      * @param array $output
      * @return array
      */
-    public function writeTransportErrors(TransportErrors $errors, array $output)
+    public function writeTransportErrors(array $errors, array $output): array
     {
-        foreach ($errors->get() as $error) {
+        foreach ($errors as $error) {
             $errorData = [];
             if ($error->getMessage()) {
                 $errorData['m'] = $error->getMessage();

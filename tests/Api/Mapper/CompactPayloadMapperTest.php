@@ -82,7 +82,7 @@ class CompactPayloadMapperTest extends TestCase
         $this->assertContainsOnlyInstancesOf(Link::class, $transport->getLinks());
         $this->assertContainsOnlyInstancesOf(Caller::class, $transport->getCalls());
         $this->assertContainsOnlyInstancesOf(Transaction::class, $transport->getTransactions());
-        $this->assertInstanceOf(TransportErrors::class, $transport->getErrors());
+        $this->assertContainsOnlyInstancesOf(Transport\Error::class, $transport->getErrors());
         $this->assertInstanceOf(File::class, $transport->getBody());
     }
 }

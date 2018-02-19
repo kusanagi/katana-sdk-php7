@@ -18,6 +18,7 @@ namespace Katana\Sdk\Api;
 use Katana\Sdk\Api\Transport\ActionData;
 use Katana\Sdk\Api\Transport\Callee;
 use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Error;
 use Katana\Sdk\Api\Transport\ForeignRelation;
 use Katana\Sdk\Api\Transport\Link;
 use Katana\Sdk\Api\Transport\Relation;
@@ -75,7 +76,7 @@ class Transport
     private $transactions = [];
 
     /**
-     * @var TransportErrors
+     * @var Error[]
      */
     private $errors;
 
@@ -94,7 +95,7 @@ class Transport
             [],
             [],
             [],
-            new TransportErrors()
+            []
         );
     }
 
@@ -106,7 +107,7 @@ class Transport
      * @param Link[] $links
      * @param Caller[] $calls
      * @param Transaction[] $transactions
-     * @param TransportErrors $errors
+     * @param Error[] $errors
      * @param FileInterface|null $body
      */
     public function __construct(
@@ -117,7 +118,7 @@ class Transport
         array $links,
         array $calls,
         array $transactions,
-        TransportErrors $errors,
+        array $errors,
         FileInterface $body = null
     ) {
         $this->meta = $meta;
@@ -215,15 +216,22 @@ class Transport
     }
 
     /**
+     * @param string $type
      * @return Transaction[]
      */
-    public function getTransactions(): array
+    public function getTransactions(string $type = ''): array
     {
-        return $this->transactions;
+        if (!$type) {
+            return $this->transactions;
+        }
+
+        return array_filter($this->transactions, function (Transaction $transaction) use ($type) {
+            return $transaction->getType() === $type;
+        });
     }
 
     /**
-     * @return TransportErrors
+     * @return Error[]
      */
     public function getErrors()
     {
@@ -588,6 +596,8 @@ class Transport
      */
     public function addError(Error $error)
     {
-        return $this->errors->add($error);
+        $this->errors[] = $error;
+
+        return true;
     }
 }

@@ -89,7 +89,7 @@ interface TransportReaderInterface
 
     /**
      * @param array $raw
-     * @return TransportErrors
+     * @return Transport\Error[]
      */
-    public function getTransportErrors(array $raw);
+    public function getTransportErrors(array $raw): array;
 }

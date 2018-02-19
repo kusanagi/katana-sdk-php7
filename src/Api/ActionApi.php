@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Action;
+use Katana\Sdk\Api\Transport\Error;
 use Katana\Sdk\Api\Value\ActionTarget;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Component\Component;
