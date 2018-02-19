@@ -110,7 +110,6 @@ class SchemaMapperTest extends TestCase
         // Assert entity
         $this->assertEquals('entity:data', $action->getEntityPath());
         $this->assertEquals(':', $action->getPathDelimiter());
-        $this->assertEquals('uid', $action->getPrimaryKey());
         $this->assertEquals(true, $action->isCollection());
 
         // Assert tags
@@ -300,6 +299,7 @@ class SchemaMapperTest extends TestCase
                 ]
             ],
             "validate" => true,
+            "primary_key" => "uid"
         ];
 
         $this->assertEquals($entityExpectation, $action->getEntity());

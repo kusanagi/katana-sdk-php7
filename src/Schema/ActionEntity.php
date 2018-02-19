@@ -118,6 +118,10 @@ class ActionEntity
             $result['validate'] = $definition['V'];
         }
 
+        if (isset($definition['k'])) {
+            $result['primary_key'] = $definition['k'];
+        }
+
         return $result;
     }
 

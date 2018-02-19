@@ -11,7 +11,6 @@
           "x": 1000,
           "e": "entity:data",
           "d": ":",
-          "k": "uid",
           "c": true,
           "h": {
             "p": "/posts/{user_id}"
@@ -70,7 +69,6 @@
           "x": 1000,
           "e": "entity:data",
           "d": ":",
-          "k": "uid",
           "c": true,
           "D": true,
           "h": {
@@ -112,7 +110,8 @@
                 "t": "integer"
               }
             ],
-            "V": true
+            "V": true,
+            "k": "uid"
           },
           "r": [
             {
@@ -137,7 +136,6 @@
       "ac": {
         "check": {
           "x": 1000,
-          "k": "uid",
           "c": true,
           "p": {
             "user_id": {
