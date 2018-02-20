@@ -428,8 +428,8 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                         $version,
                         $callData['C'],
                         new Callee(
+                            $callData['x'] ?? 0,
                             $callData['D'] ?? 0,
-                            isset($callData['g']),
                             $callData['g'] ?? '',
                             $callData['n'],
                             $callData['v'],
@@ -463,7 +463,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
             if ($callee->isRemote()) {
                 $callData['g'] = $callee->getAddress();
-                $callData['t'] = $caller->getTimeout();
+                $callData['x'] = $caller->getTimeout();
             }
 
             if ($callee->getParams()) {

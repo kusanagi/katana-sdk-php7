@@ -425,8 +425,8 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
                         $version,
                         $callData['caller'],
                         new Callee(
+                            $callData['timeout'] ?? 0,
                             $callData['duration'] ?? 0,
-                            isset($callData['gateway']),
                             $callData['gateway'] ?? '',
                             $callData['name'],
                             $callData['version'],
