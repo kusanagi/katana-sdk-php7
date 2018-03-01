@@ -17,6 +17,11 @@ namespace Katana\Sdk\Mapper;
 
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
+use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -62,56 +67,44 @@ interface TransportWriterInterface
     public function writeTransportBody(File $body, array $output);
 
     /**
-     * @param TransportData $data
+     * @param ServiceData[] $data
      * @param array $output
      * @return array
      */
-    public function writeTransportData(TransportData $data, array $output);
+    public function writeTransportData(array $data, array $output): array;
 
     /**
-     * @param array $raw
-     * @return TransportRelations
-     */
-    public function getTransportRelations(array $raw);
-
-    /**
-     * @param TransportRelations $relations
+     * @param Relation[] $relations
      * @param array $output
      * @return array
      */
-    public function writeTransportRelations(TransportRelations $relations, array $output);
+    public function writeTransportRelations(array $relations, array $output): array;
 
     /**
-     * @param array $raw
-     * @return TransportLinks
-     */
-    public function getTransportLinks(array $raw);
-
-    /**
-     * @param TransportLinks $links
+     * @param Link[] $links
      * @param array $output
      * @return array
      */
-    public function writeTransportLinks(TransportLinks $links, array $output);
+    public function writeTransportLinks(array $links, array $output): array;
 
     /**
-     * @param TransportCalls $calls
+     * @param Caller[] $calls
      * @param array $output
      * @return array
      */
-    public function writeTransportCalls(TransportCalls $calls, array $output);
+    public function writeTransportCalls(array $calls, array $output): array;
 
     /**
-     * @param TransportTransactions $transactions
+     * @param Transaction[] $transactions
      * @param array $output
      * @return array
      */
-    public function writeTransportTransactions(TransportTransactions $transactions, array $output);
+    public function writeTransportTransactions(array $transactions, array $output): array;
 
     /**
-     * @param TransportErrors $errors
+     * @param Transport\Error[] $errors
      * @param array $output
      * @return array
      */
-    public function writeTransportErrors(TransportErrors $errors, array $output);
+    public function writeTransportErrors(array $errors, array $output): array;
 }

@@ -22,6 +22,13 @@ use Katana\Sdk\Api\Param;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\Callee;
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\ForeignRelation;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
+use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -31,6 +38,7 @@ use Katana\Sdk\Api\TransportMeta;
 use Katana\Sdk\Api\TransportRelations;
 use Katana\Sdk\Api\TransportTransactions;
 use Katana\Sdk\Api\Value\VersionString;
+use Katana\Sdk\Exception\InvalidValueException;
 
 class ExtendedTransportMapper implements TransportWriterInterface, TransportReaderInterface
 {
@@ -98,10 +106,10 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
         if ($transport->getRelations()->get()) {
             $output = $this->writeTransportRelations($transport->getRelations(), $output);
         }
-        if ($transport->getLinks()->get()) {
+        if ($transport->getLinks()) {
             $output = $this->writeTransportLinks($transport->getLinks(), $output);
         }
-        if ($transport->getCalls()->get()) {
+        if ($transport->getCalls()) {
             $output = $this->writeTransportCalls($transport->getCalls(), $output);
         }
         if ($transport->getTransactions()->get()) {
@@ -268,140 +276,45 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportData|null
+     * @return ServiceData[]
+     * @throws InvalidValueException
      */
-    public function getTransportData(array $raw)
+    public function getTransportData(array $raw): array
     {
-        if (isset($raw['data'])) {
-            $data = $raw['data'];
-        } else {
-            $data = [];
+        if (!isset($raw['data'])) {
+            return [];
         }
 
-        return new TransportData($data);
-    }
+        $datas = [];
 
-    /**
-     * @param TransportData $data
-     * @param array $output
-     * @return array
-     */
-    public function writeTransportData(TransportData $data, array $output)
-    {
-        $output['data'] = $data->get();
-
-        return $output;
-    }
-
-    /**
-     * @param array $raw
-     * @return TransportRelations
-     */
-    public function getTransportRelations(array $raw)
-    {
-        if (isset($raw['relations'])) {
-            $relations = $raw['relations'];
-        } else {
-            $relations = [];
-        }
-
-        return new TransportRelations($relations);
-    }
-
-    /**
-     * @param TransportRelations $relations
-     * @param array $output
-     * @return array
-     */
-    public function writeTransportRelations(TransportRelations $relations, array $output)
-    {
-        $output['relations'] = $relations->get();
-
-        return $output;
-    }
-
-    /**
-     * @param array $raw
-     * @return TransportLinks
-     */
-    public function getTransportLinks(array $raw)
-    {
-        if (isset($raw['links'])) {
-            $links = $raw['links'];
-        } else {
-            $links = [];
-        }
-
-        return new TransportLinks($links);
-    }
-
-    /**
-     * @param TransportLinks $links
-     * @param array $output
-     * @return array
-     */
-    public function writeTransportLinks(TransportLinks $links, array $output)
-    {
-        $output['links'] = $links->get();
-
-        return $output;
-    }
-
-    /**
-     * @param array $raw
-     * @return TransportCalls
-     */
-    public function getTransportCalls(array $raw)
-    {
-        if (isset($raw['calls'])) {
-            $rawCalls = $raw['calls'];
-        } else {
-            $rawCalls = [];
-        }
-
-        $calls = [];
-        foreach ($rawCalls as $address => $addressCalls) {
-            foreach ($addressCalls as $service => $serviceCalls) {
-                foreach ($serviceCalls as $version => $versionCalls) {
-                    $calls += array_map(function (array $callData) use ($address, $service, $version) {
-                        return new DeferCall(
-                            new ServiceOrigin($service, $version),
-                            $callData['caller'],
-                            $callData['name'],
-                            new VersionString($callData['version']),
-                            $callData['action'],
-                            $callData['duration'],
-                            isset($callData['params'])? array_map([$this, 'getParam'], $callData['params']) : []
-                        );
-                    }, $versionCalls);
+        foreach ($raw['data'] as $address => $addressData) {
+            foreach ($addressData as $name => $serviceData) {
+                foreach ($serviceData as $version => $versionData) {
+                    $actionDatas = [];
+                    foreach ($versionData as $action => $actionData) {
+                        foreach ($actionData as $data) {
+                            $actionDatas[] = new ActionData($action, $data);
+                        }
+                    }
+                    $datas[] = new ServiceData($address, $name, $version, $actionDatas);
                 }
             }
         }
 
-        return new TransportCalls($calls);
+        return $datas;
     }
 
     /**
-     * @param TransportCalls $calls
+     * @param ServiceData[] $data
      * @param array $output
      * @return array
      */
-    public function writeTransportCalls(TransportCalls $calls, array $output)
+    public function writeTransportData(array $data, array $output): array
     {
-        foreach ($calls->get() as $call) {
-            $callData = [
-                'name' => $call->getService(),
-                'version' => $call->getVersion(),
-                'action' => $call->getAction(),
-                'duration' => $call->getDuration(),
-                'caller' => $call->getCaller(),
-            ];
-
-            if ($call->getParams()) {
-                $callData['params'] = array_map([$this, 'writeParam'], $call->getParams());
+        foreach ($data as $serviceData) {
+            foreach ($serviceData->getActions() as $actionData) {
+                $output['data'][$serviceData->getAddress()][$serviceData->getName()][$serviceData->getVersion()][$actionData->getName()][] = $actionData->getData();
             }
-
-            $output['calls'][$call->getOrigin()->getName()][$call->getOrigin()->getVersion()][] = $callData;
         }
 
         return $output;
@@ -409,56 +322,205 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportTransactions
+     * @return Relation[]
+     * @throws InvalidValueException
      */
-    public function getTransportTransactions(array $raw)
+    public function getTransportRelations(array $raw): array
     {
-        if (isset($raw['transactions'])) {
-            $rawTransactions = $raw['transactions'];
-        } else {
-            $rawTransactions = [];
+        if (!isset($raw['relations'])) {
+            return [];
         }
 
-        $transactions = [];
-        foreach ($rawTransactions as $address => $addressTransactions) {
-            foreach ($addressTransactions as $type => $typeTransactions) {
-                $transactions += array_map(function ($transactionData) use ($address, $type) {
-                    return new Transaction(
-                        $type,
-                        new ServiceOrigin($transactionData['service'], $transactionData['version']),
-                        $transactionData['action'],
-                        $transactionData['callee'],
-                        isset($transactionData['params']) ? array_map([$this, 'getParam'], $transactionData['params']) : []
-                    );
-                }, $typeTransactions);
+        $relations = [];
+
+        foreach ($raw['relations'] as $addressFrom => $addressFromRelations) {
+            foreach ($addressFromRelations as $serviceFrom => $serviceFromRelations) {
+                foreach ($serviceFromRelations as $idFrom => $idFromRelations) {
+                    $fromRelations = [];
+                    foreach ($idFromRelations as $addressTo => $addressToRelations) {
+                        foreach ($addressToRelations as $serviceTo => $serviceToRelations) {
+                            $type = is_array($serviceToRelations) ? 'many' : 'one';
+                            $fromRelations[] = new ForeignRelation($addressTo, $serviceTo, $type, (array) $serviceToRelations);
+                        }
+                    }
+                    $relations[] = new Relation($addressFrom, $serviceFrom, $idFrom, $fromRelations);
+                }
             }
         }
 
-        return new TransportTransactions($transactions);
+        return $relations;
     }
 
     /**
-     * @param TransportTransactions $transactions
+     * @param Relation[] $relations
      * @param array $output
      * @return array
      */
-    public function writeTransportTransactions(TransportTransactions $transactions, array $output)
+    public function writeTransportRelations(array $relations, array $output): array
     {
-        foreach ($transactions->get() as $transaction) {
+        foreach ($relations as $r) {
+            foreach ($r->getForeignRelations() as $fr) {
+                $foreignKeys = $fr->getForeignKeys();
+                $output['relations'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getType() === 'one' ? $foreignKeys[0] : $foreignKeys;
+            }
+        }
+
+        return $output;
+    }
+
+    /**
+     * @param array $raw
+     * @return Link[]
+     */
+    public function getTransportLinks(array $raw): array
+    {
+        if (!isset($raw['links'])) {
+            return [];
+        }
+
+        $links = [];
+
+        foreach ($raw['links'] as $address => $addressLinks) {
+            foreach ($addressLinks as $name => $serviceLinks) {
+                foreach ($serviceLinks as $link => $uri) {
+                    $links[] = new Link($address, $name, $link, $uri);
+                }
+            }
+        }
+
+        return $links;
+    }
+
+    /**
+     * @param Link[] $links
+     * @param array $output
+     * @return array
+     */
+    public function writeTransportLinks(array $links, array $output): array
+    {
+        $links = [];
+
+        foreach ($links as $link) {
+            $links[$link->getAddress()][$link->getName()][$link->getLink()] = $link->getUri();
+        }
+
+        return $output;
+    }
+
+    /**
+     * @param array $raw
+     * @return Caller[]
+     */
+    public function getTransportCalls(array $raw): array
+    {
+        if (!isset($raw['calls'])) {
+            return [];
+        }
+
+        $calls = [];
+        foreach ($raw['calls'] as $service => $serviceCalls) {
+            foreach ($serviceCalls as $version => $versionCalls) {
+                $calls += array_map(function (array $callData) use ($service, $version) {
+                    return new Caller(
+                        $service,
+                        $version,
+                        $callData['caller'],
+                        new Callee(
+                            $callData['timeout'] ?? 0,
+                            $callData['duration'] ?? 0,
+                            $callData['gateway'] ?? '',
+                            $callData['name'],
+                            $callData['version'],
+                            $callData['action'],
+                            isset($callData['params'])? array_map([$this, 'getParam'], $callData['params']) : []
+                        )
+                    );
+                }, $versionCalls);
+            }
+        }
+
+        return $calls;
+    }
+
+    /**
+     * @param Caller[] $calls
+     * @param array $output
+     * @return array
+     */
+    public function writeTransportCalls(array $calls, array $output): array
+    {
+        foreach ($calls as $caller) {
+            $callee = $caller->getCallee();
+            $callData = [
+                'name' => $callee->getName(),
+                'version' => $callee->getVersion(),
+                'action' => $callee->getAction(),
+                'duration' => $callee->getDuration(),
+                'caller' => $caller->getAction(),
+            ];
+
+            if ($callee->isRemote()) {
+                $callData['gateway'] = $callee->getAddress();
+                $callData['timeout'] = $caller->getTimeout();
+            }
+
+            if ($callee->getParams()) {
+                $callData['params'] = array_map([$this, 'writeParam'], $callee->getParams());
+            }
+
+            $output['calls'][$caller->getName()][$caller->getVersion()][] = $callData;
+        }
+
+        return $output;
+    }
+
+    /**
+     * @param array $raw
+     * @return Transaction[]
+     */
+    public function getTransportTransactions(array $raw): array
+    {
+        if (!isset($raw['transactions'])) {
+            return [];
+        }
+
+        $transactions = [];
+        foreach ($raw['transactions'] as $type => $typeTransactions) {
+            $transactions = array_merge($transactions, array_map(function ($transactionData) use ($type) {
+                return new Transport\Transaction(
+                    $type,
+                    $transactionData['name'],
+                    $transactionData['version'],
+                    $transactionData['caller'],
+                    $transactionData['action'],
+                    isset($transactionData['params']) ? array_map([$this, 'getParam'], $transactionData['params']) : []
+                );
+            }, $typeTransactions));
+        }
+
+        return $transactions;
+    }
+
+    /**
+     * @param Transaction[] $transactions
+     * @param array $output
+     * @return array
+     */
+    public function writeTransportTransactions(array $transactions, array $output): array
+    {
+        foreach ($transactions as $transaction) {
             $transactionData = [
-                'service' => $transaction->getOrigin()->getName(),
-                'version' => $transaction->getOrigin()->getVersion(),
-                'action' => $transaction->getAction(),
-                'callee' => $transaction->getCallee(),
+                'name' => $transaction->getName(),
+                'version' => $transaction->getVersion(),
+                'caller' => $transaction->getCallerAction(),
+                'action' => $transaction->getCalleeAction(),
             ];
 
             if ($transaction->getParams()) {
                 $transactionData['params'] = array_map([$this, 'writeParam'], $transaction->getParams());
             }
 
-            $type = $transaction->getType();
-
-            $output['transactions'][$transaction->getOrigin()->getName()][$type][] = $transactionData;
+            $output['t'][$transaction->getType()][] = $transactionData;
         }
 
         return $output;
@@ -466,42 +528,43 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
 
     /**
      * @param array $raw
-     * @return TransportErrors
+     * @return Transport\Error[]
      */
-    public function getTransportErrors(array $raw)
+    public function getTransportErrors(array $raw): array
     {
-        if (isset($raw['errors'])) {
-            $rawErrors = $raw['errors'];
-        } else {
-            $rawErrors = [];
+        if (!isset($raw['errors'])) {
+            return [];
         }
 
         $errors = [];
-        foreach ($rawErrors as $service => $serviceErrors) {
-            foreach ($serviceErrors as $version => $versionErrors) {
-                $errors += array_map(function ($errorData) use ($service, $version) {
-                    return new Error(
-                        $service,
-                        $version,
-                        $errorData['message'],
-                        $errorData['code'],
-                        $errorData['status']
-                    );
-                }, $versionErrors);
+        foreach ($raw['errors'] as $address => $addressErrors) {
+            foreach ($addressErrors as $service => $serviceErrors) {
+                foreach ($serviceErrors as $version => $versionErrors) {
+                    $errors += array_map(function ($errorData) use ($address, $service, $version) {
+                        return new Transport\Error(
+                            $address,
+                            $service,
+                            $version,
+                            $errorData['message'],
+                            $errorData['code'],
+                            $errorData['status']
+                        );
+                    }, $versionErrors);
+                }
             }
         }
 
-        return new TransportErrors($errors);
+        return $errors;
     }
 
     /**
-     * @param TransportErrors $errors
+     * @param Error[] $errors
      * @param array $output
      * @return array
      */
-    public function writeTransportErrors(TransportErrors $errors, array $output)
+    public function writeTransportErrors(array $errors, array $output): array
     {
-        foreach ($errors->get() as $error) {
+        foreach ($errors as $error) {
             $errorData = [];
             if ($error->getMessage()) {
                 $errorData['message'] = $error->getMessage();
@@ -512,7 +575,7 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
             if ($error->getStatus()) {
                 $errorData['status'] = $error->getStatus();
             }
-            $output['errors'][$error->getService()][$error->getVersion()][] = $errorData;
+            $output['errors'][$error->getName()][$error->getVersion()][] = $errorData;
         }
 
         return $output;

@@ -16,6 +16,7 @@
 namespace Katana\Sdk\Api;
 
 use Katana\Sdk\Action;
+use Katana\Sdk\Api\Transport\Error;
 use Katana\Sdk\Api\Value\ActionTarget;
 use Katana\Sdk\Api\Value\VersionString;
 use Katana\Sdk\Component\Component;
@@ -234,15 +235,15 @@ class ActionApi extends Api implements Action
      * @param array $entity
      * @return Action
      * @throws TransportException
+     * @throws InvalidValueException
      */
     public function setEntity(array $entity): Action
     {
-        $type = $this->typeCatalog::TYPE_OBJECT;
-        if (!$this->typeCatalog->validate($type, $entity)) {
+        $actionData = $this->transport->setData($this->name, $this->version, $this->actionName, $entity);
+
+        if ($actionData->isCollection()) {
             throw new TransportException('Invalid Entity');
         }
-
-        $this->transport->setData($this->name, $this->version, $this->actionName, $entity);
 
         return $this;
     }
@@ -251,15 +252,15 @@ class ActionApi extends Api implements Action
      * @param array $collection
      * @return Action
      * @throws TransportException
+     * @throws InvalidValueException
      */
     public function setCollection(array $collection): Action
     {
-        $type = $this->typeCatalog::TYPE_ARRAY;
-        if (!$this->typeCatalog->validate($type, $collection)) {
+        $actionData = $this->transport->setData($this->name, $this->version, $this->actionName, $collection);
+
+        if (!$actionData->isCollection()) {
             throw new TransportException('Invalid Collection');
         }
-
-        $this->transport->setCollection($this->name, $this->version, $this->actionName, $collection);
 
         return $this;
     }
@@ -269,6 +270,7 @@ class ActionApi extends Api implements Action
      * @param string $service
      * @param string $foreignKey
      * @return Action
+     * @throws InvalidValueException
      */
     public function relateOne(
         string $primaryKey,
@@ -286,6 +288,7 @@ class ActionApi extends Api implements Action
      * @param string $service
      * @param array $foreignKeys
      * @return Action
+     * @throws InvalidValueException
      */
     public function relateMany(
         string $primaryKey,
@@ -314,6 +317,7 @@ class ActionApi extends Api implements Action
      * @param string $action
      * @param array $params
      * @return Action
+     * @throws InvalidValueException
      */
     public function commit(string $action, array $params = []): Action
     {
@@ -334,6 +338,7 @@ class ActionApi extends Api implements Action
      * @param string $action
      * @param array $params
      * @return Action
+     * @throws InvalidValueException
      */
     public function rollback(string $action, array $params = []): Action
     {
@@ -354,6 +359,7 @@ class ActionApi extends Api implements Action
      * @param string $action
      * @param array $params
      * @return Action
+     * @throws InvalidValueException
      */
     public function complete(string $action, array $params = []): Action
     {
@@ -378,6 +384,8 @@ class ActionApi extends Api implements Action
      * @param array $files
      * @param int $timeout
      * @return mixed
+     * @throws InvalidValueException
+     * @throws \Katana\Sdk\Exception\RuntimeCallException
      */
     public function call(
         string $service,
@@ -414,6 +422,7 @@ class ActionApi extends Api implements Action
      * @param File[] $files
      * @return Action
      * @throws InvalidValueException
+     * @throws SchemaException
      */
     public function deferCall(
         string $service,
@@ -470,6 +479,7 @@ class ActionApi extends Api implements Action
      * @param int $timeout
      * @return Action
      * @throws InvalidValueException
+     * @throws SchemaException
      */
     public function remoteCall(
         string $address,

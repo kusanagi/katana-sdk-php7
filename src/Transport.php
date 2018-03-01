@@ -15,6 +15,13 @@
 
 namespace Katana\Sdk;
 
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Error;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
+use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
+
 /**
  * Interface to the Transport object contained in a payload
  * @package Katana\Sdk
@@ -85,80 +92,42 @@ interface Transport
     /**
      * Return the data stored in the Transport
      *
-     * If the optional "service" argument is specified, only data stored under
-     * that service is returned
-     *
-     * If the optional "version" argument is specified, only data stored under
-     * that service and version is returned
-     *
-     * If the optional "action" argument is specified, only data stored under
-     * that service, version and action is returned
-     *
-     * @param string $address
-     * @param string $service
-     * @param string $version
-     * @param string $action
-     * @return array
+     * @return ServiceData[]
      */
-    public function getData(
-        string $address = '',
-        string $service = '',
-        string $version = '',
-        string $action = ''
-    );
+    public function getData(): array;
 
     /**
      * Return all the relations stored in the Transport
      *
-     * If the optional "service" argument is specified, only relations under
-     * that service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Relation[]
      */
-    public function getRelations(string $service = ''): array;
+    public function getRelations(): array;
 
     /**
      * Return all the links stored in the Transport
      *
-     * If the optional "service" argument is specified, only links under that
-     * service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Link[]
      */
-    public function getLinks(string$service = ''): array;
+    public function getLinks(): array;
 
     /**
      * Return all the calls stored in the Transport
      *
-     * If the optional "service" argument is specified, only calls under that
-     * service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Caller[]
      */
-    public function getCalls(string $service = ''): array;
+    public function getCalls(): array;
 
     /**
-     * Return all the transactions stored in the Transport
+     * Return all the transactions of one type stored in the Transport
      *
-     * If the optional "service" argument is specified, only transactions under
-     * that service are returned
-     *
-     * @param string $service
-     * @return array
+     * @param string $type Type of transactions to get
+     * @return Transaction[]
      */
-    public function getTransactions(string $service = ''): array;
+    public function getTransactions(string $type): array;
 
     /**
      * Return all the errors stored in the Transport
-     *
-     * If the optional "service" argument is specified, only errors under
-     * that service are returned
-     *
-     * @param string $service
-     * @return array
+     * @return Error[]
      */
-    public function getErrors(string $service = ''): array;
+    public function getErrors(): array;
 }

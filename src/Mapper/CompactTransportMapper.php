@@ -23,6 +23,13 @@ use Katana\Sdk\Api\RemoteCall;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\Callee;
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\ForeignRelation;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
+use Katana\Sdk\Api\Transport\ServiceData;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -32,6 +39,7 @@ use Katana\Sdk\Api\TransportMeta;
 use Katana\Sdk\Api\TransportRelations;
 use Katana\Sdk\Api\TransportTransactions;
 use Katana\Sdk\Api\Value\VersionString;
+use Katana\Sdk\Exception\InvalidValueException;
 
 class CompactTransportMapper implements TransportWriterInterface, TransportReaderInterface
 {
@@ -61,6 +69,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             't' => $param->getType(),
         ];
     }
+
     /**
      * @param array $raw
      * @return Transport
@@ -91,22 +100,22 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         if ($transport->getFiles()->getAll()) {
             $output = $this->writeTransportFiles($transport->getFiles(), $output);
         }
-        if ($transport->getData()->get()) {
+        if ($transport->getData()) {
             $output = $this->writeTransportData($transport->getData(), $output);
         }
-        if ($transport->getRelations()->get()) {
+        if ($transport->getRelations()) {
             $output = $this->writeTransportRelations($transport->getRelations(), $output);
         }
-        if ($transport->getLinks()->get()) {
+        if ($transport->getLinks()) {
             $output = $this->writeTransportLinks($transport->getLinks(), $output);
         }
-        if ($transport->getCalls()->get()) {
+        if ($transport->getCalls()) {
             $output = $this->writeTransportCalls($transport->getCalls(), $output);
         }
-        if ($transport->getTransactions()->get()) {
+        if ($transport->getTransactions()) {
             $output = $this->writeTransportTransactions($transport->getTransactions(), $output);
         }
-        if ($transport->getErrors()->get()) {
+        if ($transport->getErrors()) {
             $output = $this->writeTransportErrors($transport->getErrors(), $output);
         }
         if ($transport->hasBody()) {
@@ -272,28 +281,45 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportData
+     * @return ServiceData[]
+     * @throws InvalidValueException
      */
-    public function getTransportData(array $raw)
+    public function getTransportData(array $raw): array
     {
-        if (isset($raw['d'])) {
-            $data = $raw['d'];
-        } else {
-            $data = [];
+        if (!isset($raw['d'])) {
+            return [];
         }
 
-        return new TransportData($data);
+        $datas = [];
+
+        foreach ($raw['d'] as $address => $addressData) {
+            foreach ($addressData as $name => $serviceData) {
+                foreach ($serviceData as $version => $versionData) {
+                    $actionDatas = [];
+                    foreach ($versionData as $action => $actionData) {
+                        foreach ($actionData as $data) {
+                            $actionDatas[] = new ActionData($action, $data);
+                        }
+                    }
+                    $datas[] = new ServiceData($address, $name, $version, $actionDatas);
+                }
+            }
+        }
+
+        return $datas;
     }
 
     /**
-     * @param TransportData $data
+     * @param ServiceData[] $data
      * @param array $output
      * @return array
      */
-    public function writeTransportData(TransportData $data, array $output)
+    public function writeTransportData(array $data, array $output): array
     {
-        if ($data->get()) {
-            $output['d'] = $data->get();
+        foreach ($data as $serviceData) {
+            foreach ($serviceData->getActions() as $actionData) {
+                $output['d'][$serviceData->getAddress()][$serviceData->getName()][$serviceData->getVersion()][$actionData->getName()][] = $actionData->getData();
+            }
         }
 
         return $output;
@@ -301,28 +327,47 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportRelations
+     * @return Relation[]
+     * @throws InvalidValueException
      */
-    public function getTransportRelations(array $raw)
+    public function getTransportRelations(array $raw): array
     {
-        if (isset($raw['r']) && (array) $raw['r']) {
-            $relations = $raw['r'];
-        } else {
-            $relations = [];
+        if (!isset($raw['r'])) {
+            return [];
         }
 
-        return new TransportRelations($relations);
+        $relations = [];
+
+        foreach ($raw['r'] as $addressFrom => $addressFromRelations) {
+            foreach ($addressFromRelations as $serviceFrom => $serviceFromRelations) {
+                foreach ($serviceFromRelations as $idFrom => $idFromRelations) {
+                    $fromRelations = [];
+                    foreach ($idFromRelations as $addressTo => $addressToRelations) {
+                        foreach ($addressToRelations as $serviceTo => $serviceToRelations) {
+                            $type = is_array($serviceToRelations) ? 'many' : 'one';
+                            $fromRelations[] = new ForeignRelation($addressTo, $serviceTo, $type, (array) $serviceToRelations);
+                        }
+                    }
+                    $relations[] = new Relation($addressFrom, $serviceFrom, $idFrom, $fromRelations);
+                }
+            }
+        }
+
+        return $relations;
     }
 
     /**
-     * @param TransportRelations $relations
+     * @param Relation[] $relations
      * @param array $output
      * @return array
      */
-    public function writeTransportRelations(TransportRelations $relations, array $output)
+    public function writeTransportRelations(array $relations, array $output): array
     {
-        if ($relations->get()) {
-            $output['r'] = $relations->get();
+        foreach ($relations as $r) {
+            foreach ($r->getForeignRelations() as $fr) {
+                $foreignKeys = $fr->getForeignKeys();
+                $output['r'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getType() === 'one' ? $foreignKeys[0] : $foreignKeys;
+            }
         }
 
         return $output;
@@ -330,28 +375,36 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportLinks
+     * @return Link[]
      */
-    public function getTransportLinks(array $raw)
+    public function getTransportLinks(array $raw): array
     {
-        if (isset($raw['l']) && (array) $raw['l']) {
-            $links = $raw['l'];
-        } else {
-            $links = [];
+        if (!isset($raw['l'])) {
+            return [];
         }
 
-        return new TransportLinks($links);
+        $links = [];
+
+        foreach ($raw['l'] as $address => $addressLinks) {
+            foreach ($addressLinks as $name => $serviceLinks) {
+                foreach ($serviceLinks as $link => $uri) {
+                    $links[] = new Link($address, $name, $link, $uri);
+                }
+            }
+        }
+
+        return $links;
     }
 
     /**
-     * @param TransportLinks $links
+     * @param Link[] $links
      * @param array $output
      * @return array
      */
-    public function writeTransportLinks(TransportLinks $links, array $output)
+    public function writeTransportLinks(array $links, array $output): array
     {
-        if ($links->get()) {
-            $output['l'] = $links->get();
+        foreach ($links as $link) {
+            $output['l'][$link->getAddress()][$link->getName()][$link->getLink()] = $link->getUri();
         }
 
         return $output;
@@ -359,64 +412,66 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportCalls
+     * @return Caller[]
      */
-    public function getTransportCalls(array $raw)
+    public function getTransportCalls(array $raw): array
     {
-        if (isset($raw['C']) && (array) $raw['C']) {
-            $rawCalls = $raw['C'];
-        } else {
-            $rawCalls = [];
+        if (!isset($raw['C'])) {
+            return [];
         }
 
         $calls = [];
-        foreach ($rawCalls as $service => $serviceCalls) {
+        foreach ($raw['C'] as $service => $serviceCalls) {
             foreach ($serviceCalls as $version => $versionCalls) {
                 $calls += array_map(function (array $callData) use ($service, $version) {
-                    return new DeferCall(
-                        new ServiceOrigin($service, $version),
+                    return new Caller(
+                        $service,
+                        $version,
                         $callData['C'],
-                        $callData['n'],
-                        new VersionString($callData['v']),
-                        $callData['a'],
-                        $callData['D'] ?? 0,
-                        isset($callData['p'])? array_map([$this, 'getParam'], $callData['p']) : []
+                        new Callee(
+                            $callData['x'] ?? 0,
+                            $callData['D'] ?? 0,
+                            $callData['g'] ?? '',
+                            $callData['n'],
+                            $callData['v'],
+                            $callData['a'],
+                            isset($callData['p'])? array_map([$this, 'getParam'], $callData['p']) : []
+                        )
                     );
                 }, $versionCalls);
             }
         }
 
-        return new TransportCalls($calls);
+        return $calls;
     }
 
     /**
-     * @param TransportCalls $calls
+     * @param Caller[] $calls
      * @param array $output
      * @return array
      */
-    public function writeTransportCalls(TransportCalls $calls, array $output)
+    public function writeTransportCalls(array $calls, array $output): array
     {
-        foreach ($calls->get() as $call) {
+        foreach ($calls as $caller) {
+            $callee = $caller->getCallee();
             $callData = [
-                'n' => $call->getService(),
-                'v' => $call->getVersion(),
-                'a' => $call->getAction(),
-                'D' => $call->getDuration(),
-                'C' => $call->getCaller(),
+                'n' => $callee->getName(),
+                'v' => $callee->getVersion(),
+                'a' => $callee->getAction(),
+                'D' => $callee->getDuration(),
+                'C' => $caller->getAction(),
             ];
 
-            if ($call instanceof RemoteCall) {
-                $callData['g'] = $call->getAddress();
-                $callData['t'] = $call->getTimeout();
+            if ($callee->isRemote()) {
+                $callData['g'] = $callee->getAddress();
+                $callData['x'] = $caller->getTimeout();
             }
 
-            if ($call->getParams()) {
-                $callData['p'] = array_map([$this, 'writeParam'], $call->getParams());
-            } else {
-                $callData['p'] = [];
+            if ($callee->getParams()) {
+                $callData['p'] = array_map([$this, 'writeParam'], $callee->getParams());
             }
 
-            $output['C'][$call->getOrigin()->getName()][$call->getOrigin()->getVersion()][] = $callData;
+            $output['C'][$caller->getName()][$caller->getVersion()][] = $callData;
         }
 
         return $output;
@@ -424,18 +479,16 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportTransactions
+     * @return Transport\Transaction[]
      */
-    public function getTransportTransactions(array $raw)
+    public function getTransportTransactions(array $raw): array
     {
-        if (isset($raw['t'])) {
-            $rawTransactions = $raw['t'];
-        } else {
-            $rawTransactions = [];
+        if (!isset($raw['t'])) {
+            return [];
         }
 
         $transactions = [];
-        foreach ($rawTransactions as $type => $typeTransactions) {
+        foreach ($raw['t'] as $type => $typeTransactions) {
             $transactions = array_merge($transactions, array_map(function ($transactionData) use ($type) {
                 $type = [
                     'c' => 'commit',
@@ -443,32 +496,33 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                     'C' => 'complete',
                 ][$type];
 
-                return new Transaction(
+                return new Transport\Transaction(
                     $type,
-                    new ServiceOrigin($transactionData['n'], $transactionData['v']),
+                    $transactionData['n'],
+                    $transactionData['v'],
+                    $transactionData['C'],
                     $transactionData['a'],
-                    $transactionData['c'],
                     isset($transactionData['p']) ? array_map([$this, 'getParam'], $transactionData['p']) : []
                 );
             }, $typeTransactions));
         }
 
-        return new TransportTransactions($transactions);
+        return $transactions;
     }
 
     /**
-     * @param TransportTransactions $transactions
+     * @param Transport\Transaction[] $transactions
      * @param array $output
      * @return array
      */
-    public function writeTransportTransactions(TransportTransactions $transactions, array $output)
+    public function writeTransportTransactions(array $transactions, array $output): array
     {
-        foreach ($transactions->get() as $transaction) {
+        foreach ($transactions as $transaction) {
             $transactionData = [
-                's' => $transaction->getOrigin()->getName(),
-                'v' => $transaction->getOrigin()->getVersion(),
-                'a' => $transaction->getAction(),
-                'c' => $transaction->getCallee(),
+                'n' => $transaction->getName(),
+                'v' => $transaction->getVersion(),
+                'C' => $transaction->getCallerAction(),
+                'a' => $transaction->getCalleeAction(),
             ];
 
             if ($transaction->getParams()) {
@@ -489,22 +543,20 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
 
     /**
      * @param array $raw
-     * @return TransportErrors
+     * @return Error[]
      */
-    public function getTransportErrors(array $raw)
+    public function getTransportErrors(array $raw): array
     {
-        if (isset($raw['e'])) {
-            $rawErrors = $raw['e'];
-        } else {
-            $rawErrors = [];
+        if (!isset($raw['e'])) {
+            return [];
         }
 
         $errors = [];
-        foreach ($rawErrors as $address => $addressErrors) {
+        foreach ($raw['e'] as $address => $addressErrors) {
             foreach ($addressErrors as $service => $serviceErrors) {
                 foreach ($serviceErrors as $version => $versionErrors) {
                     $errors += array_map(function ($errorData) use ($address, $service, $version) {
-                        return new Error(
+                        return new Transport\Error(
                             $address,
                             $service,
                             $version,
@@ -517,17 +569,17 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             }
         }
 
-        return new TransportErrors($errors);
+        return $errors;
     }
 
     /**
-     * @param TransportErrors $errors
+     * @param Transport\Error[] $errors
      * @param array $output
      * @return array
      */
-    public function writeTransportErrors(TransportErrors $errors, array $output)
+    public function writeTransportErrors(array $errors, array $output): array
     {
-        foreach ($errors->get() as $error) {
+        foreach ($errors as $error) {
             $errorData = [];
             if ($error->getMessage()) {
                 $errorData['m'] = $error->getMessage();
@@ -538,12 +590,17 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             if ($error->getStatus()) {
                 $errorData['s'] = $error->getStatus();
             }
-            $output['e'][$error->getAddress()][$error->getService()][$error->getVersion()][] = $errorData;
+            $output['e'][$error->getAddress()][$error->getName()][$error->getVersion()][] = $errorData;
         }
 
         return $output;
     }
 
+    /**
+     * @param Transport $transport
+     * @param array $mergeData
+     * @throws InvalidValueException
+     */
     public function merge(Transport $transport, array $mergeData)
     {
         // Merge meta properties and fallbacks
@@ -563,65 +620,56 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         );
 
         // Merge data
+        $data = [];
         foreach ($mergeData['d'] ?? [] as $address => $aData) {
             foreach ($aData as $service => $sData) {
                 foreach ($sData as $version => $vData) {
+                    $actions = [];
                     foreach ($vData as $action => $data) {
-                        $transport->getData()->set(
-                            $address, $service, $version, $action, $data
-                        );
+                        $actions[] = new ActionData($action, $data);
                     }
+                    $data[] = new ServiceData($address, $service, $version, $actions);
                 }
             }
         }
 
         // Merge relations
-        $relations = $transport->getRelations()->get();
-        foreach ($mergeData['r'] ?? [] as $address1 => $a1Relations) {
-            foreach ($a1Relations as $service1 => $s1Relations) {
-                foreach ($s1Relations as $id1 => $i1Relations) {
-                    foreach ($i1Relations as $address2 => $a2Relations) {
-                        foreach ($a2Relations as $service2 => $s2Relations) {
-                            if (isset($relations[$address1][$service1][$id1][$address2][$service2])) {
-                                continue;
-                            }
-
-                            if (is_array($s2Relations)) {
-                                $transport->getRelations()->addMultipleRelation(
-                                    $address1,
-                                    $service1,
-                                    $id1,
-                                    $address2,
-                                    $service2,
-                                    $s2Relations
-                                );
-                            } else {
-                                $transport->getRelations()->addSimple(
-                                    $address1,
-                                    $service1,
-                                    $id1,
-                                    $address2,
-                                    $service2,
-                                    $s2Relations
-                                );
-                            }
+        $relations = [];
+        foreach ($mergeData['r'] ?? [] as $addressFrom => $addressFromRelations) {
+            foreach ($addressFromRelations as $serviceFrom => $serviceFromRelations) {
+                foreach ($serviceFromRelations as $idFrom => $idFromRelations) {
+                    $foreignRelations = [];
+                    foreach ($idFromRelations as $addressTo => $addressToRelations) {
+                        foreach ($addressToRelations as $serviceTo => $foreignKeys) {
+                            $foreignRelations[] = new ForeignRelation(
+                                $addressTo,
+                                $serviceTo,
+                                is_array($foreignKeys) ? 'many' : 'one',
+                                (array) $foreignKeys
+                            );
                         }
                     }
+                    $relations[] = new Relation(
+                        $addressFrom,
+                        $serviceFrom,
+                        $idFrom,
+                        $foreignRelations
+                    );
                 }
             }
         }
+        $transport->mergeRelations(...$relations);
 
         // Merge links
-        $links = $transport->getLinks()->get();
+        $links = [];
         foreach ($mergeData['l'] ?? [] as $address => $aLinks) {
             foreach ($aLinks as $namespace => $nLinks) {
                 foreach ($nLinks as $name => $link) {
-                    if (!isset($links[$address][$namespace][$name])) {
-                        $transport->getLinks()->setLink($address, $namespace, $name, $link);
-                    }
+                    $links[] = new Link($address, $namespace, $name, $link);
                 }
             }
         }
+        $transport->mergeLinks(...$links);
 
         // Merge calls
         foreach ($mergeData['C'] ?? [] as $service => $sCalls) {

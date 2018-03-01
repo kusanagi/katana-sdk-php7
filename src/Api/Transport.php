@@ -15,7 +15,17 @@
 
 namespace Katana\Sdk\Api;
 
+use Katana\Sdk\Api\Transport\ActionData;
+use Katana\Sdk\Api\Transport\Callee;
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Error;
+use Katana\Sdk\Api\Transport\ForeignRelation;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
+use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\Value\VersionString;
+use Katana\Sdk\Exception\InvalidValueException;
 use Katana\Sdk\File as FileInterface;
 
 /**
@@ -41,32 +51,32 @@ class Transport
     private $files;
 
     /**
-     * @var TransportData
+     * @var ServiceData[]
      */
-    private $data;
+    private $data = [];
 
     /**
-     * @var TransportRelations
+     * @var Relation[]
      */
-    private $relations;
+    private $relations = [];
 
     /**
-     * @var TransportLinks
+     * @var Link[]
      */
-    private $links;
+    private $links = [];
 
     /**
-     * @var TransportCalls
+     * @var Caller[]
      */
-    private $calls;
+    private $calls = [];
 
     /**
-     * @var TransportTransactions
+     * @var Transaction[]
      */
-    private $transactions;
+    private $transactions = [];
 
     /**
-     * @var TransportErrors
+     * @var Error[]
      */
     private $errors;
 
@@ -80,35 +90,35 @@ class Transport
         return new Transport(
             new TransportMeta('', '', '', '', [], 0, '', [], 0),
             new TransportFiles([]),
-            new TransportData(),
-            new TransportRelations(),
-            new TransportLinks(),
-            new TransportCalls(),
-            new TransportTransactions(),
-            new TransportErrors()
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
         );
     }
 
     /**
      * @param TransportMeta $meta
      * @param TransportFiles $files
-     * @param TransportData $data
-     * @param TransportRelations $relations
-     * @param TransportLinks $links
-     * @param TransportCalls $calls
-     * @param TransportTransactions $transactions
-     * @param TransportErrors $errors
+     * @param ServiceData[] $data
+     * @param Relation[] $relations
+     * @param Link[] $links
+     * @param Caller[] $calls
+     * @param Transaction[] $transactions
+     * @param Error[] $errors
      * @param FileInterface|null $body
      */
     public function __construct(
         TransportMeta $meta,
         TransportFiles $files,
-        TransportData $data,
-        TransportRelations $relations,
-        TransportLinks $links,
-        TransportCalls $calls,
-        TransportTransactions $transactions,
-        TransportErrors $errors,
+        array $data,
+        array $relations,
+        array $links,
+        array $calls,
+        array $transactions,
+        array $errors,
         FileInterface $body = null
     ) {
         $this->meta = $meta;
@@ -158,25 +168,25 @@ class Transport
     }
 
     /**
-     * @return TransportData
+     * @return ServiceData[]
      */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
     /**
-     * @return TransportRelations
+     * @return Relation[]
      */
-    public function getRelations()
+    public function getRelations(): array
     {
         return $this->relations;
     }
 
     /**
-     * @return TransportLinks
+     * @return Link[]
      */
-    public function getLinks()
+    public function getLinks(): array
     {
         return $this->links;
     }
@@ -184,15 +194,15 @@ class Transport
     /**
      * @return bool
      */
-    public function hasCalls()
+    public function hasCalls(): bool
     {
-        return $this->calls->has();
+        return count($this->calls) > 0;
     }
 
     /**
-     * @return TransportCalls
+     * @return Caller[]
      */
-    public function getCalls()
+    public function getCalls(): array
     {
         return $this->calls;
     }
@@ -202,19 +212,26 @@ class Transport
      */
     public function hasTransactions()
     {
-        return $this->transactions->has();
+        return count($this->transactions) > 0;
     }
 
     /**
-     * @return TransportTransactions
+     * @param string $type
+     * @return Transaction[]
      */
-    public function getTransactions()
+    public function getTransactions(string $type = ''): array
     {
-        return $this->transactions;
+        if (!$type) {
+            return $this->transactions;
+        }
+
+        return array_filter($this->transactions, function (Transaction $transaction) use ($type) {
+            return $transaction->getType() === $type;
+        });
     }
 
     /**
-     * @return TransportErrors
+     * @return Error[]
      */
     public function getErrors()
     {
@@ -274,27 +291,141 @@ class Transport
     }
 
     /**
-     * @param string $service
+     * @param string $address
+     * @param string $name
      * @param string $version
-     * @param string $action
-     * @param array $data
-     * @return bool
+     * @return int
      */
-    public function setData($service, $version, $action, array $data)
+    private function findServiceData(string $address, string $name, string $version): int
     {
-        return $this->data->set($this->meta->getGateway()[1], $service, $version, $action, $data);
+        $match = array_filter(
+            $this->data,
+            function (ServiceData $serviceData) use ($address, $name, $version) {
+                return $serviceData->getAddress() === $address
+                    && $serviceData->getName() === $name
+                    && $serviceData->getVersion() === $version;
+            }
+        );
+
+        if ($match) {
+            return key($match);
+        } else {
+            return -1;
+        }
     }
 
     /**
      * @param string $service
      * @param string $version
      * @param string $action
-     * @param array $collection
-     * @return bool
+     * @param array $data
+     * @return ActionData
+     * @throws InvalidValueException
      */
-    public function setCollection($service, $version, $action, array $collection)
+    public function setData($service, $version, $action, array $data): ActionData
     {
-        return $this->data->set($this->meta->getGateway()[1], $service, $version, $action, $collection);
+        $actionData = new ActionData($action, $data);
+
+        $match = $this->findServiceData($this->meta->getGateway()[1], $service, $version);
+        if ($match >= 0) {
+            $dataActions =  $this->data[$match]->getActions();
+            $dataActions[] = $actionData;
+            $this->data[$match] = new ServiceData($this->meta->getGateway()[1], $service, $version, $dataActions);
+        } else {
+            $this->data[] = new ServiceData($this->meta->getGateway()[1], $service, $version, [$actionData]);
+        }
+
+        return $actionData;
+    }
+
+    /**
+     * @param ServiceData[] $data
+     */
+    public function mergeData(ServiceData ...$data)
+    {
+        foreach ($data as $serviceData) {
+            $match = $this->findServiceData($serviceData->getAddress(), $serviceData->getName(), $serviceData->getVersion());
+            if ($match === -1) {
+                $this->data[] = $serviceData;
+            } else {
+                $actions = array_merge($this->data[$match]->getActions(), $serviceData->getActions());
+                $this->data[$match] = new ServiceData(
+                    $serviceData->getAddress(),
+                    $serviceData->getName(),
+                    $serviceData->getVersion(),
+                    $actions
+                );
+            }
+        }
+    }
+
+    /**
+     * @param string $address
+     * @param string $name
+     * @param string $primaryKey
+     * @return int
+     */
+    private function findRelation(string $address, string $name, string $primaryKey): int
+    {
+        $match = array_filter(
+            $this->relations,
+            function (Relation $relation) use ($address, $name, $primaryKey) {
+                return $relation->getAddress() === $address
+                    && $relation->getName() === $name
+                    && $relation->getPrimaryKey() === $primaryKey;
+            }
+        );
+
+        if ($match) {
+            return key($match);
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * @param string $type
+     * @param string $serviceFrom
+     * @param string $idFrom
+     * @param string $serviceTo
+     * @param array $ids
+     * @return bool
+     * @throws InvalidValueException
+     */
+    private function addRelation(
+        string $type,
+        string $serviceFrom,
+        string $idFrom,
+        string $serviceTo,
+        array $ids
+    ): bool {
+        $foreignRelation = new ForeignRelation(
+            $this->meta->getGateway()[1],
+            $serviceTo,
+            $type,
+            $ids
+        );
+
+        $match = $this->findRelation($this->meta->getGateway()[1], $serviceFrom, $idFrom);
+        if ($match >= 0) {
+            $foreignRelations =  $this->relations[$match]->getForeignRelations();
+            $foreignRelations[] = $foreignRelation;
+            $this->relations[$match] = new Relation(
+                $this->meta->getGateway()[1],
+                $serviceFrom,
+                $idFrom,
+                $foreignRelations
+            );
+        } else {
+            $this->relations[] = new Relation(
+                $this->meta->getGateway()[1],
+                $serviceFrom,
+                $idFrom,
+                [$foreignRelation]
+            );
+        }
+
+        return true;
     }
 
     /**
@@ -303,17 +434,11 @@ class Transport
      * @param string $serviceTo
      * @param string $idTo
      * @return bool
+     * @throws InvalidValueException
      */
-    public function addSimpleRelation($serviceFrom, $idFrom, $serviceTo, $idTo)
+    public function addSimpleRelation($serviceFrom, $idFrom, $serviceTo, $idTo): bool
     {
-        return $this->relations->addSimple(
-            $this->meta->getGateway()[1],
-            $serviceFrom,
-            $idFrom,
-            $this->meta->getGateway()[1],
-            $serviceTo,
-            $idTo
-        );
+        return $this->addRelation('one', $serviceFrom, $idFrom, $serviceTo, [$idTo]);
     }
 
     /**
@@ -322,17 +447,59 @@ class Transport
      * @param string $serviceTo
      * @param array $idsTo
      * @return bool
+     * @throws InvalidValueException
      */
-    public function addMultipleRelation($serviceFrom, $idFrom, $serviceTo, array $idsTo)
+    public function addMultipleRelation($serviceFrom, $idFrom, $serviceTo, array $idsTo): bool
     {
-        return $this->relations->addMultipleRelation(
-            $this->meta->getGateway()[1],
-            $serviceFrom,
-            $idFrom,
-            $this->meta->getGateway()[1],
-            $serviceTo,
-            $idsTo
+        return $this->addRelation('many', $serviceFrom, $idFrom, $serviceTo, $idsTo);
+    }
+
+    /**
+     * @param Relation[] $relations
+     */
+    public function mergeRelations(Relation ...$relations)
+    {
+        foreach ($relations as $relation) {
+            $match = $this->findRelation($relation->getAddress(), $relation->getName(), $relation->getPrimaryKey());
+            if ($match === -1) {
+                $this->relations[] = $relation;
+            } else {
+                $foreignRelations = array_merge(
+                    $this->relations[$match]->getForeignRelations(),
+                    $relation->getForeignRelations()
+                );
+                $this->relations[$match] = new Relation(
+                    $relation->getAddress(),
+                    $relation->getName(),
+                    $relation->getPrimaryKey(),
+                    $foreignRelations
+                );
+            }
+        }
+    }
+
+    /**
+     * @param string $address
+     * @param string $namespace
+     * @param string $link
+     * @return int
+     */
+    private function findLink(string $address, string $namespace, string $link): int
+    {
+        $match = array_filter(
+            $this->links,
+            function (Link $linkObject) use ($address, $namespace, $link) {
+                return $linkObject->getAddress() === $address
+                    && $linkObject->getName() === $namespace
+                    && $linkObject->getLink() === $link;
+            }
         );
+
+        if ($match) {
+            return key($match);
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -341,18 +508,54 @@ class Transport
      * @param string $uri
      * @return bool
      */
-    public function setLink($namespace, $link, $uri)
+    public function setLink($namespace, $link, $uri): bool
     {
-        return $this->links->setLink($this->meta->getGateway()[1], $namespace, $link, $uri);
+        $linkObject = new Link(
+            $this->meta->getGateway()[1],
+            $namespace,
+            $link,
+            $uri
+        );
+
+        $match = $this->findLink($this->meta->getGateway()[1], $namespace, $link);
+        if ($match >= 0) {
+            $this->links[$match] = $linkObject;
+        } else {
+            $this->links[] = $linkObject;
+        }
+
+        return true;
     }
 
     /**
-     * @param Transaction $transaction
-     * @return bool
+     * @param Link[] $links
      */
-    public function addTransaction(Transaction $transaction)
+    public function mergeLinks(Link ...$links)
     {
-        return $this->transactions->add($transaction);
+        foreach ($links as $link) {
+            if ($this->findLink($link->getAddress(), $link->getName(), $link->getLink()) === -1) {
+                $this->links[] = $link;
+            }
+        }
+    }
+
+    /**
+     * @param \Katana\Sdk\Api\Transaction $transaction
+     * @return bool
+     * @throws InvalidValueException
+     */
+    public function addTransaction(\Katana\Sdk\Api\Transaction $transaction): bool
+    {
+        $this->transactions[] = new Transaction(
+            $transaction->getType(),
+            $transaction->getOrigin()->getName(),
+            $transaction->getOrigin()->getVersion(),
+            $transaction->getAction(),
+            $transaction->getCallee(),
+            $transaction->getParams()
+        );
+
+        return true;
     }
 
     /**
@@ -361,7 +564,30 @@ class Transport
      */
     public function addCall(AbstractCall $call)
     {
-        return $this->calls->add($call);
+        if ($call instanceof RemoteCall) {
+            $calleeAddress = $call->getAddress();
+            $timeout = $call->getTimeout();
+        } else {
+            $calleeAddress = '';
+            $timeout = 0;
+        }
+
+        $this->calls[] = new Caller(
+            $call->getOrigin()->getName(),
+            $call->getOrigin()->getVersion(),
+            $call->getCaller(),
+            new Callee(
+                $timeout,
+                $call->getDuration(),
+                $calleeAddress,
+                $call->getService(),
+                $call->getVersion(),
+                $call->getAction(),
+                $call->getParams()
+            )
+        );
+
+        return true;
     }
 
     /**
@@ -370,6 +596,8 @@ class Transport
      */
     public function addError(Error $error)
     {
-        return $this->errors->add($error);
+        $this->errors[] = $error;
+
+        return true;
     }
 }

@@ -15,6 +15,9 @@
 
 namespace Katana\Sdk\Api;
 
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
 use Katana\Sdk\Transport as TransportInterface;
 use Katana\Sdk\File as FileInterface;
 
@@ -100,72 +103,50 @@ class TransportReader implements TransportInterface
     }
 
     /**
-     * @param string $address
-     * @param string $service
-     * @param string $version
-     * @param string $action
      * @return array
      */
-    public function getData(
-        string $address = '',
-        string $service = '',
-        string $version = '',
-        string $action = ''
-    ): array {
-        return $this->transport->getData()->get($address, $service, $version, $action);
-    }
-
-    /**
-     * @param string $address
-     * @param string $service
-     * @return array
-     */
-    public function getRelations(
-        string $address = '',
-        string $service = ''
-    ): array {
-        return $this->transport->getRelations()->get($address, $service);
-    }
-
-    /**
-     * @param string $address
-     * @param string $service
-     * @return array
-     */
-    public function getLinks(
-        string $address = '',
-        string $service = ''
-    ): array {
-        return $this->transport->getLinks()->get($address, $service);
-    }
-
-    /**
-     * @param string $service
-     * @return array
-     */
-    public function getCalls(string $service = ''): array
+    public function getData(): array
     {
-        return $this->transport->getCalls()->getArray($service);
+        return $this->transport->getData();
     }
 
     /**
-     * @param string $service
+     * @return Relation[]
+     */
+    public function getRelations(): array
+    {
+        return $this->transport->getRelations();
+    }
+
+    /**
+     * @return Link[]
+     */
+    public function getLinks(): array {
+        return $this->transport->getLinks();
+    }
+
+    /**
+     * @return Caller[]
+     */
+    public function getCalls(): array
+    {
+        return $this->transport->getCalls();
+    }
+
+    /**
+     * @param string $type
      * @return array
      */
-    public function getTransactions(string $service = ''): array
+    public function getTransactions(string $type): array
     {
-        return $this->transport->getTransactions()->getArray($service);
+        return $this->transport->getTransactions($type);
     }
 
     /**
-     * @param string $address
-     * @param string $service
      * @return Error[]
      */
-    public function getErrors(
-        string $address = '',
-        string $service = ''
-    ): array {
-        return $this->transport->getErrors()->getArray($address, $service);
+    public function getErrors(): array
+    {
+        return $this->transport->getErrors();
     }
 }

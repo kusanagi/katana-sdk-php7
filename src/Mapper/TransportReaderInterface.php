@@ -17,6 +17,11 @@ namespace Katana\Sdk\Mapper;
 
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Transport;
+use Katana\Sdk\Api\Transport\Caller;
+use Katana\Sdk\Api\Transport\Link;
+use Katana\Sdk\Api\Transport\Relation;
+use Katana\Sdk\Api\Transport\ServiceData;
+use Katana\Sdk\Api\Transport\Transaction;
 use Katana\Sdk\Api\TransportCalls;
 use Katana\Sdk\Api\TransportData;
 use Katana\Sdk\Api\TransportErrors;
@@ -54,37 +59,37 @@ interface TransportReaderInterface
 
     /**
      * @param array $raw
-     * @return TransportData
+     * @return ServiceData[]
      */
-    public function getTransportData(array $raw);
+    public function getTransportData(array $raw): array;
 
     /**
      * @param array $raw
-     * @return TransportRelations
+     * @return Relation[]
      */
-    public function getTransportRelations(array $raw);
+    public function getTransportRelations(array $raw): array;
 
     /**
      * @param array $raw
-     * @return TransportLinks
+     * @return Link[]
      */
-    public function getTransportLinks(array $raw);
+    public function getTransportLinks(array $raw): array;
 
     /**
      * @param array $raw
-     * @return TransportCalls
+     * @return Caller[]
      */
-    public function getTransportCalls(array $raw);
+    public function getTransportCalls(array $raw): array;
 
     /**
      * @param array $raw
-     * @return TransportTransactions
+     * @return Transaction[]
      */
-    public function getTransportTransactions(array $raw);
+    public function getTransportTransactions(array $raw): array;
 
     /**
      * @param array $raw
-     * @return TransportErrors
+     * @return Transport\Error[]
      */
-    public function getTransportErrors(array $raw);
+    public function getTransportErrors(array $raw): array;
 }
