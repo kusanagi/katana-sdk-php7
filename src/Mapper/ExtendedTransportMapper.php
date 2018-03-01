@@ -360,7 +360,8 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
     {
         foreach ($relations as $r) {
             foreach ($r->getForeignRelations() as $fr) {
-                $output['relations'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getForeignKeys();
+                $foreignKeys = $fr->getForeignKeys();
+                $output['relations'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getType() === 'one' ? $foreignKeys[0] : $foreignKeys;
             }
         }
 
@@ -574,7 +575,7 @@ class ExtendedTransportMapper implements TransportWriterInterface, TransportRead
             if ($error->getStatus()) {
                 $errorData['status'] = $error->getStatus();
             }
-            $output['errors'][$error->getService()][$error->getVersion()][] = $errorData;
+            $output['errors'][$error->getName()][$error->getVersion()][] = $errorData;
         }
 
         return $output;

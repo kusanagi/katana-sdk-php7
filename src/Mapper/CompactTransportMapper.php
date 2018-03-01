@@ -365,7 +365,8 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
     {
         foreach ($relations as $r) {
             foreach ($r->getForeignRelations() as $fr) {
-                $output['r'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getForeignKeys();
+                $foreignKeys = $fr->getForeignKeys();
+                $output['r'][$r->getAddress()][$r->getName()][$r->getPrimaryKey()][$fr->getAddress()][$fr->getName()] = $fr->getType() === 'one' ? $foreignKeys[0] : $foreignKeys;
             }
         }
 
@@ -518,7 +519,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
     {
         foreach ($transactions as $transaction) {
             $transactionData = [
-                's' => $transaction->getName(),
+                'n' => $transaction->getName(),
                 'v' => $transaction->getVersion(),
                 'C' => $transaction->getCallerAction(),
                 'a' => $transaction->getCalleeAction(),
@@ -589,7 +590,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             if ($error->getStatus()) {
                 $errorData['s'] = $error->getStatus();
             }
-            $output['e'][$error->getAddress()][$error->getService()][$error->getVersion()][] = $errorData;
+            $output['e'][$error->getAddress()][$error->getName()][$error->getVersion()][] = $errorData;
         }
 
         return $output;
