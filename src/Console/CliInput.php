@@ -93,9 +93,9 @@ class CliInput
     private $variables = [];
 
     /**
-     * @var bool
+     * @var int|null
      */
-    private $quiet;
+    private $logLevel;
 
     public static function createFromCli()
     {
@@ -110,7 +110,7 @@ class CliInput
             'var' => new CliOption('V', 'var', CliOption::VALUE_MULTIPLE),
             'disable-compact-names' => new CliOption('d', 'disable-compact-names', CliOption::VALUE_NONE),
             'action' => new CliOption('a', 'action', CliOption::VALUE_SINGLE),
-            'quiet' => new CliOption('q', 'quiet', CliOption::VALUE_NONE),
+            'log-level' => new CliOption('L', 'log-level', CliOption::VALUE_SINGLE),
         ];
 
         $shortOpts = '';
@@ -142,7 +142,7 @@ class CliInput
             $optionValues['var'],
             $optionValues['disable-compact-names'] ? 'extended' : 'compact',
             $optionValues['action'],
-            $optionValues['quiet']
+            $optionValues['log-level']
         );
     }
 
@@ -157,7 +157,7 @@ class CliInput
      * @param array $variables
      * @param string $mapping
      * @param string $action
-     * @param bool $quiet
+     * @param int $logLevel
      * @throws ConsoleException
      */
     public function __construct(
@@ -170,7 +170,7 @@ class CliInput
         array $variables = [],
         $mapping = 'compact',
         $action = '',
-        $quiet = false
+        $logLevel = null
     ) {
         $this->component = $component;
         $this->name = $name;
@@ -188,7 +188,9 @@ class CliInput
             $this->input = file_get_contents('php://stdin');
             $this->action = $action;
         }
-        $this->quiet = $quiet;
+        if ($logLevel !== null) {
+            $this->logLevel = (int) $logLevel;
+        }
     }
 
     /**
@@ -301,8 +303,16 @@ class CliInput
     /**
      * @return boolean
      */
-    public function isQuiet()
+    public function hasLog()
     {
-        return $this->quiet;
+        return $this->logLevel !== null;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLogLevel(): int
+    {
+        return $this->logLevel;
     }
 }

@@ -32,12 +32,11 @@ class GlobalKatanaLogger extends KatanaLogger
 
     /**
      * @param CliInput $input
-     * @param int $level
      */
-    public function __construct(CliInput $input, int $level = null)
+    public function __construct(CliInput $input)
     {
         $this->input = $input;
-        parent::__construct($level);
+        parent::__construct($input->getLogLevel());
     }
 
 
@@ -55,7 +54,7 @@ class GlobalKatanaLogger extends KatanaLogger
                 $this->getTimestamp(),
                 "{$this->input->getComponent()} {$this->input->getName()}/{$this->input->getVersion()}",
                 $this->input->getFrameworkVersion(),
-                self::LOG_LEVELS[$level],
+                strtoupper(self::LOG_LEVELS[$level]),
                 $message
             ],
             '%TIMESTAMP% %COMPONENT% (%FRAMEWORK_VERSION%) [%TYPE%] [SDK] %MESSAGE%'

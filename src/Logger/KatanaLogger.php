@@ -15,25 +15,35 @@
 
 namespace Katana\Sdk\Logger;
 
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+
 /**
  * Logger class
  *
  * @package Katana\Sdk\Logger
  */
-abstract class KatanaLogger
+abstract class KatanaLogger extends AbstractLogger implements LoggerInterface
 {
-    const LOG_DEBUG = 0;
-    const LOG_INFO = 1;
-    const LOG_WARNING = 2;
+    const LOG_EMERGENCY = 0;
+    const LOG_ALERT = 1;
+    const LOG_CRITICAL = 2;
     const LOG_ERROR = 3;
-    const LOG_NONE = 4;
+    const LOG_WARNING = 4;
+    const LOG_NOTICE = 5;
+    const LOG_INFO = 6;
+    const LOG_DEBUG = 7;
 
     const LOG_LEVELS = [
-        self::LOG_DEBUG => 'DEBUG',
-        self::LOG_INFO => 'INFO',
-        self::LOG_WARNING => 'WARNING',
-        self::LOG_ERROR => 'ERROR',
-        self::LOG_NONE => 'NONE',
+        self::LOG_EMERGENCY => LogLevel::EMERGENCY,
+        self::LOG_ALERT     => LogLevel::ALERT,
+        self::LOG_CRITICAL  => LogLevel::CRITICAL,
+        self::LOG_ERROR     => LogLevel::ERROR,
+        self::LOG_WARNING   => LogLevel::WARNING,
+        self::LOG_NOTICE    => LogLevel::NOTICE,
+        self::LOG_INFO      => LogLevel::INFO,
+        self::LOG_DEBUG     => LogLevel::DEBUG,
     ];
 
     /**
@@ -58,9 +68,9 @@ abstract class KatanaLogger
     }
 
     /**
-     * @return bool|string
+     * @return string
      */
-    protected function getTimestamp()
+    protected function getTimestamp(): string
     {
         list($usec, $sec) = explode(" ", microtime());
         return sprintf(
@@ -80,45 +90,21 @@ abstract class KatanaLogger
     /**
      * @param int $level
      * @param string $message
+     * @param array $context
      */
-    protected function log(int $level, string $message)
+    public function log($level, $message, array $context = [])
     {
-        if ($level < $this->level) {
+        if (!is_int($level)) {
+            $level = array_search($level, self::LOG_LEVELS) ?? 6;
+        }
+
+        $level = max(0, $level);
+        $level = min(7, $level);
+
+        if ($level > $this->level) {
             return;
         }
 
         echo $this->formatMessage($level, $message), "\n";
-    }
-
-    /**
-     * @param string $message
-     */
-    public function debug(string $message)
-    {
-        $this->log(self::LOG_DEBUG, $message);
-    }
-
-    /**
-     * @param string $message
-     */
-    public function info(string $message)
-    {
-        $this->log(self::LOG_INFO, $message);
-    }
-
-    /**
-     * @param string $message
-     */
-    public function warning(string $message)
-    {
-        $this->log(self::LOG_WARNING, $message);
-    }
-
-    /**
-     * @param string $message
-     */
-    public function error(string $message)
-    {
-        $this->log(self::LOG_ERROR, $message);
     }
 }

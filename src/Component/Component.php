@@ -26,6 +26,7 @@ use Katana\Sdk\Executor\AbstractExecutor;
 use Katana\Sdk\Executor\ExecutorFactory;
 use Katana\Sdk\Logger\GlobalKatanaLogger;
 use Katana\Sdk\Logger\KatanaLogger;
+use Katana\Sdk\Logger\NullKatanaLogger;
 use Katana\Sdk\Schema\Mapping;
 
 /**
@@ -86,14 +87,11 @@ abstract class Component
     {
         $this->input = CliInput::createFromCli();
 
-        if ($this->input->isQuiet()) {
-            $level = KatanaLogger::LOG_NONE;
-        } elseif ($this->input->isDebug()) {
-            $level = KatanaLogger::LOG_DEBUG;
+        if ($this->input->hasLog()) {
+            $this->logger = new GlobalKatanaLogger($this->input);
         } else {
-            $level = KatanaLogger::LOG_INFO;
+            $this->logger = new NullKatanaLogger();
         }
-        $this->logger = new GlobalKatanaLogger($this->input, $level);
 
         $mapper = $this->input->getMapping() === 'compact'
             ? new CompactPayloadMapper()
