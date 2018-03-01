@@ -1,7 +1,7 @@
 <?php
 /**
  * PHP 7 SDK for the KATANA(tm) Framework (http://katana.kusanagi.io)
- * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ * Copyright (c) 2016-2018 KUSANAGI S.L. All rights reserved.
  *
  * Distributed under the MIT license
  *
@@ -10,7 +10,7 @@
  *
  * @link      https://github.com/kusanagi/katana-sdk-php7
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ * @copyright Copyright (c) 2016-2018 KUSANAGI S.L. (http://kusanagi.io)
  */
 
 namespace Katana\Sdk\Component;
