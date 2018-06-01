@@ -235,9 +235,9 @@ abstract class Api
      * This SDK implementation has no async support.
      *
      * @see https://github.com/kusanagi/katana-sdk-spec#apidone--boolean
-     * @return bool
+     * @throws UnsupportedException
      */
-    public function done(): bool
+    public function done()
     {
         throw new UnsupportedException('SDK does not support async call to end action: Api.done()');
     }
