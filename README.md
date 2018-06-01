@@ -10,7 +10,7 @@ PHP7 SDK to interface with the **KATANA**™ framework (https://kusanagi.io).
 Requirements
 ------------
 
-* KATANA Framework 1.2
+* KATANA Framework 2.1
 * [libzmq](http://zeromq.org) 4.1.5+
 * [zmq extension](https://github.com/mkoppanen/php-zmq)
 * [msgpack extension](https://github.com/msgpack/msgpack-php)
