@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## Added
+- Support for wildcards in call configuration
 
 ## [2.1.0] - 2018-06-01
 ## Changed

@@ -231,9 +231,9 @@ class ActionSchema
     public function hasCall($service, $version = '', $action = '')
     {
         $filter = array_filter($this->calls, function ($call) use ($service, $version, $action) {
-            return $service === $call[0]
-                && (!$version || $version === $call[1])
-                && (!$action || $action === $call[2]);
+            return ($call[0] || $service === $call[0])
+                && (!$version || $call[1] || $version === $call[1])
+                && (!$action || $call[2] || $action === $call[2]);
         });
 
         return count($filter) > 0;
@@ -264,9 +264,9 @@ class ActionSchema
     public function hasDeferCall($service, $version = '', $action = '')
     {
         $filter = array_filter($this->deferCalls, function ($deferCall) use ($service, $version, $action) {
-            return $service === $deferCall[0]
-                && (!$version || $version === $deferCall[1])
-                && (!$action || $action === $deferCall[2]);
+            return ($deferCall[0] === '*' || $service === $deferCall[0])
+                && (!$version || $deferCall[1] === '*' || $version === $deferCall[1])
+                && (!$action || $deferCall[2] === '*' || $action === $deferCall[2]);
         });
 
         return count($filter) > 0;
@@ -298,10 +298,10 @@ class ActionSchema
     public function hasRemoteCall($address, $service = '', $version = '', $action = '')
     {
         $filter = array_filter($this->remoteCalls, function ($remoteCall) use ($address, $service, $version, $action) {
-            return $address === $remoteCall[0]
-                && (!$service || $service === $remoteCall[1])
-                && (!$version || $version === $remoteCall[2])
-                && (!$action || $action === $remoteCall[3]);
+            return ($remoteCall[0] === '*' || $address === $remoteCall[0])
+                && (!$service || $remoteCall[1] === '*' || $service === $remoteCall[1])
+                && (!$version || $remoteCall[2] === '*' || $version === $remoteCall[2])
+                && (!$action || $remoteCall[3] === '*' || $action === $remoteCall[3]);
         });
 
         return count($filter) > 0;
