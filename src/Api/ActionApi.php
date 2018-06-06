@@ -386,6 +386,7 @@ class ActionApi extends Api implements Action
      * @return mixed
      * @throws InvalidValueException
      * @throws \Katana\Sdk\Exception\RuntimeCallException
+     * @throws SchemaException
      */
     public function call(
         string $service,
@@ -395,6 +396,18 @@ class ActionApi extends Api implements Action
         array $files = [],
         int $timeout = 10000
     ) {
+        $serviceSchema = $this->getServiceSchema($this->name, $this->version);
+        $actionSchema = $serviceSchema->getActionSchema($this->actionName);
+
+        if (!$actionSchema->hasCall($service, $version, $action)) {
+            throw new InvalidValueException(sprintf(
+                'Call not configured, connection to action on "%s" (%s) aborted: "%s"',
+                $service,
+                $version,
+                $action
+            ));
+        }
+
         $address = 'ipc://@katana-' . preg_replace(
             '/[^a-zA-Z0-9-]/',
             '-',
