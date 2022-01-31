@@ -560,9 +560,9 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                             $address,
                             $service,
                             $version,
-                            $errorData['m'],
-                            $errorData['c'],
-                            $errorData['s']
+                            $errorData['m'] ?? 'Unknown error',
+                            $errorData['c'] ?? 0,
+                            $errorData['s'] ?? '500 Internal Server Error'
                         );
                     }, $versionErrors);
                 }
