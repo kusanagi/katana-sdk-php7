@@ -372,4 +372,28 @@ class Transport
     {
         return $this->errors->add($error);
     }
+
+
+
+    public function replace(
+        TransportMeta $meta,
+        TransportFiles $files,
+        TransportData $data,
+        TransportRelations $relations,
+        TransportLinks $links,
+        TransportCalls $calls,
+        TransportTransactions $transactions,
+        TransportErrors $errors,
+        FileInterface $body = null
+    ) {
+        $this->meta = $meta;
+        $this->files = $files;
+        $this->data = $data;
+        $this->relations = $relations;
+        $this->links = $links;
+        $this->calls = $calls;
+        $this->transactions = $transactions;
+        $this->errors = $errors;
+        $this->body = $body;
+    }
 }
