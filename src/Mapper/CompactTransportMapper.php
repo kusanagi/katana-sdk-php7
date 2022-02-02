@@ -671,42 +671,6 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         }
         $transport->mergeLinks(...$links);
 
-        // Merge calls
-        foreach ($mergeData['C'] ?? [] as $service => $sCalls) {
-            foreach ($sCalls as $version => $vCalls) {
-                foreach ($vCalls as $vCall) {
-                    if (!isset($vCall['D']) || $vCall['D'] === 0) {
-                        continue;
-                    }
-
-                    if (isset($vCall['g'])) {
-                        $call = new RemoteCall(
-                            new ServiceOrigin($service, $version),
-                            $vCall['C'],
-                            $vCall['g'],
-                            $vCall['n'],
-                            new VersionString($vCall['v']),
-                            $vCall['a'],
-                            $vCall['D'] ?? 0,
-                            $vCall['t'],
-                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
-                        );
-                    } else {
-                        $call = new DeferCall(
-                            new ServiceOrigin($service, $version),
-                            $vCall['C'],
-                            $vCall['n'],
-                            new VersionString($vCall['v']),
-                            $vCall['a'],
-                            $vCall['D'] ?? 0,
-                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
-                        );
-                    }
-                    $transport->addCall($call);
-                }
-            }
-        }
-
         // Merge Transactions
         foreach ($mergeData['t'] ?? [] as $type => $transaction) {
             $type = [
