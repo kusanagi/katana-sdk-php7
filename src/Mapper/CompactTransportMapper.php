@@ -735,4 +735,186 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             }
         }
     }
+
+    public function replace(Transport $transport, array $replaceData)
+    {
+        $rawMeta = $replaceData['m'];
+        $meta = new TransportMeta(
+            $rawMeta['v'],
+            $rawMeta['i'],
+            $rawMeta['d'],
+            $rawMeta['s'] ?? '',
+            $rawMeta['e'] ?? '',
+            $rawMeta['D'] ?? 0,
+            $rawMeta['g'],
+            $rawMeta['o'],
+            $rawMeta['l'],
+            isset($rawMeta['p'])? $rawMeta['p'] : []
+        );
+        $meta->setFallbacks($rawMeta['f'] ?? []);
+
+        $data = new TransportData($replaceData['d']);
+
+        $files = new TransportFiles();
+        foreach ($replaceData['f'] ?? [] as $address => $aFiles) {
+            foreach ($aFiles as $service => $sFiles) {
+                foreach ($sFiles as $version => $vFiles) {
+                    foreach ($vFiles as $action => $aFiles) {
+                        foreach ($aFiles as $file) {
+                            $transport->getFiles()->add(
+                                $address,
+                                $service,
+                                new VersionString($version),
+                                $action,
+                                new File(
+                                    $file['n'],
+                                    $file['p'],
+                                    $file['m'],
+                                    $file['f'],
+                                    $file['s'],
+                                    $file['t']
+                                )
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        $relations = new TransportRelations();
+        foreach ($replaceData['r'] ?? [] as $address1 => $a1Relations) {
+            foreach ($a1Relations as $service1 => $s1Relations) {
+                foreach ($s1Relations as $id1 => $i1Relations) {
+                    foreach ($i1Relations as $address2 => $a2Relations) {
+                        foreach ($a2Relations as $service2 => $s2Relations) {
+                            if (is_array($s2Relations)) {
+                                $transport->getRelations()->addMultipleRelation(
+                                    $address1,
+                                    $service1,
+                                    $id1,
+                                    $address2,
+                                    $service2,
+                                    $s2Relations
+                                );
+                            } else {
+                                $transport->getRelations()->addSimple(
+                                    $address1,
+                                    $service1,
+                                    $id1,
+                                    $address2,
+                                    $service2,
+                                    $s2Relations
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $links = new TransportLinks();
+        foreach ($replaceData['l'] ?? [] as $address => $aLinks) {
+            foreach ($aLinks as $namespace => $nLinks) {
+                foreach ($nLinks as $name => $link) {
+                    if (!isset($links[$address][$namespace][$name])) {
+                        $transport->getLinks()->setLink($address, $namespace, $name, $link);
+                    }
+                }
+            }
+        }
+
+        $calls = new TransportCalls();
+        foreach ($replaceData['C'] ?? [] as $service => $sCalls) {
+            foreach ($sCalls as $version => $vCalls) {
+                foreach ($vCalls as $vCall) {
+                    if (!isset($vCall['D']) || $vCall['D'] === 0) {
+                        continue;
+                    }
+
+                    if (isset($vCall['g'])) {
+                        $call = new RemoteCall(
+                            new ServiceOrigin($service, $version),
+                            $vCall['C'],
+                            $vCall['g'],
+                            $vCall['n'],
+                            new VersionString($vCall['v']),
+                            $vCall['a'],
+                            $vCall['D'] ?? 0,
+                            $vCall['t'],
+                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
+                        );
+                    } else {
+                        $call = new DeferCall(
+                            new ServiceOrigin($service, $version),
+                            $vCall['C'],
+                            $vCall['n'],
+                            new VersionString($vCall['v']),
+                            $vCall['a'],
+                            $vCall['D'] ?? 0,
+                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
+                        );
+                    }
+                    $calls->add($call);
+                }
+            }
+        }
+
+        $transactions = new TransportTransactions();
+        foreach ($replaceData['t'] ?? [] as $type => $transaction) {
+            $type = [
+                'c' => 'commit',
+                'r' => 'rollback',
+                'C' => 'complete',
+            ][$type];
+            $transactions->add(new Transaction(
+                $type,
+                new ServiceOrigin($transaction['n'], $transaction['v']),
+                $transaction['a'],
+                $transaction['c'],
+                isset($transaction['p']) ? array_map([$this, 'getParam'], $transaction['p']) : []
+            ));
+        }
+
+        $errors = new TransportErrors();
+        foreach ($replaceData['e'] ?? [] as $address => $aErrors) {
+            foreach ($aErrors as $service => $sErrors) {
+                foreach ($sErrors as $version => $vErrors) {
+                    foreach ($vErrors as $error) {
+                        $errors->add(new Error(
+                            $address,
+                            $service,
+                            $version,
+                            $error['m'],
+                            $error['c'],
+                            $error['s']
+                        ));
+                    }
+                }
+            }
+        }
+
+        $body = null;
+        if (isset($replaceData['b'])) {
+            $body = new File(
+                'body',
+                $replaceData['b']['p'],
+                $replaceData['b']['m'],
+                $replaceData['b']['f'],
+                $replaceData['b']['s'],
+                $replaceData['b']['t']
+            );
+        }
+
+        $transport->replace(
+            $meta,
+            $files,
+            $data,
+            $relations,
+            $links,
+            $calls,
+            $transactions,
+            $errors,
+            $body
+        );
+    }
 }

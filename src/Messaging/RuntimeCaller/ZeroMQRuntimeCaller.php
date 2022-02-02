@@ -149,7 +149,7 @@ class ZeroMQRuntimeCaller
                 throw new RuntimeCallException("Error response: {$response['E']['m']}");
             } else {
                 $return = $response['cr']['r']['rv'];
-                $this->mapper->merge($transport, $response['cr']['r']['T']);
+                $this->mapper->replace($transport, $response['cr']['r']['T']);
                 $transport->addCall(
                     new RuntimeCall(
                         new ServiceOrigin($service, $version),
