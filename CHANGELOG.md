@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.2] - 2022-02-02
+## Fixed
+- Change merge transport for replacement on runtime calls
+
 ## [1.3.1] - 2017-12-05
 ## Fixed
 - Add a default value for the optional response body
