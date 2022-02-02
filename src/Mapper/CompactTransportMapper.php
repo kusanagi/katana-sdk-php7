@@ -495,9 +495,9 @@ class CompactTransportMapper
                             $address,
                             $service,
                             $version,
-                            $errorData['m'],
-                            $errorData['c'],
-                            $errorData['s']
+                            $errorData['m'] ?? 'Unknown error',
+                            $errorData['c'] ?? 0,
+                            $errorData['s'] ?? '500 Internal Server Error'
                         );
                     }, $versionErrors);
                 }
@@ -829,9 +829,9 @@ class CompactTransportMapper
                             $address,
                             $service,
                             $version,
-                            $error['m'],
-                            $error['c'],
-                            $error['s']
+                            $error['m'] ?? 'Unknown error',
+                            $error['c'] ?? 0,
+                            $error['s'] ?? '500 Internal Server Error'
                         ));
                     }
                 }
