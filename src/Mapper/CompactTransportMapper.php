@@ -753,7 +753,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         );
         $meta->setFallbacks($rawMeta['f'] ?? []);
 
-        $data = new TransportData($replaceData['d']);
+        $data = new TransportData($replaceData['d'] ?? []);
 
         $files = new TransportFiles();
         foreach ($replaceData['f'] ?? [] as $address => $aFiles) {
