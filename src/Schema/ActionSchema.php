@@ -156,6 +156,14 @@ class ActionSchema
     }
 
     /**
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->entity->getTimeout();
+    }
+
+    /**
      * @return string
      */
     public function getEntityPath()

@@ -60,7 +60,7 @@ class SchemaMapper
 
 
     }
-    
+
     /**
      * @param string $name
      * @param string $version
@@ -152,6 +152,7 @@ class SchemaMapper
             $actions[] = new ActionSchema(
                 $actionName,
                 new ActionEntity(
+                    $this->read($action, 'x', 10000),
                     $this->read($action, 'e', ''),
                     $this->read($action, 'd', '/'),
                     $this->read($action, 'k', 'id'),
