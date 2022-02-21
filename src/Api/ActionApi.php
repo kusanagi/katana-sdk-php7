@@ -612,4 +612,11 @@ class ActionApi extends Api implements Action
             return $this->typeCatalog->getDefault($action->getReturnType());
         }
     }
+
+    public function getTimeout(): int
+    {
+        $service = $this->getServiceSchema($this->name, $this->version);
+
+        return $service->getActionSchema($this->actionName)->getTimeout();
+    }
 }

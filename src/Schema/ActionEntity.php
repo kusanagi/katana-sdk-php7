@@ -20,6 +20,11 @@ use Katana\Sdk\Exception\SchemaException;
 class ActionEntity
 {
     /**
+     * @var int
+     */
+    private $timeout;
+
+    /**
      * Path to the entity in each object returned by the action.
      *
      * @var string
@@ -122,6 +127,7 @@ class ActionEntity
     }
 
     /**
+     * @param int $timeout
      * @param string $entityPath
      * @param string $pathDelimiter
      * @param string $primaryKey
@@ -129,12 +135,14 @@ class ActionEntity
      * @param array $definition
      */
     public function __construct(
+        $timeout,
         $entityPath,
         $pathDelimiter,
         $primaryKey,
         $collection,
         $definition = []
     ) {
+        $this->timeout = $timeout;
         $this->entityPath = $entityPath;
         $this->pathDelimiter = $pathDelimiter;
         $this->primaryKey = $primaryKey;
@@ -143,6 +151,14 @@ class ActionEntity
             // Definition stops being sent as an array in next alpha
             $this->definition = $this->parseDefinition($definition);
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
     }
 
     /**
