@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.3.2] - 2022-02-21
+## [1.3.4] - 2022-02-21
 - Add ActionApi::getTimeout()
 
-## [1.3.2] - 2022-02-04
+## [1.3.3] - 2022-02-04
 - Fix transport replace
 
 ## [1.3.2] - 2022-02-02
