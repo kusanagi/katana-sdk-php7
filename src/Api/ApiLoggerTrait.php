@@ -23,7 +23,7 @@ trait ApiLoggerTrait
     /**
      * @return KatanaLogger
      */
-    abstract protected function getLogger(): KatanaLogger;
+    abstract public function getLogger(): KatanaLogger;
 
     /**
      * @param mixed $value
