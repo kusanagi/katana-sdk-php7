@@ -34,24 +34,24 @@ class ActionApi extends Api implements Action
     /**
      * @var string
      */
-    private $actionName;
+    protected $actionName;
 
     /**
      * @var Transport
      */
-    private $transport;
+    protected $transport;
 
     /**
      * Copy of the Transport to send in runtime calls.
      *
      * @var Transport
      */
-    private $transportCopy;
+    protected $transportCopy;
 
     /**
      * @var ZeroMQRuntimeCaller
      */
-    private $caller;
+    protected $caller;
 
     /**
      * @var mixed
@@ -61,7 +61,7 @@ class ActionApi extends Api implements Action
     /**
      * @var TypeCatalog
      */
-    private $typeCatalog;
+    protected $typeCatalog;
 
     /**
      * Action constructor.
@@ -618,5 +618,24 @@ class ActionApi extends Api implements Action
         $service = $this->getServiceSchema($this->name, $this->version);
 
         return $service->getActionSchema($this->actionName)->getTimeout();
+    }
+
+    public function getWorkerAction(): WorkerAction
+    {
+        return new WorkerAction(
+            $this->name,
+            $this->version,
+            $this->actionName,
+            $this->transport,
+            $this->logger,
+            $this->typeCatalog,
+            $this->mapping,
+            $this->params
+        );
+    }
+
+    public function applyWorkerAction(WorkerAction $workerAction)
+    {
+        $this->transport = $workerAction->getTransport();
     }
 }
