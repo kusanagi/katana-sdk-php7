@@ -61,7 +61,6 @@ final class WorkerAction extends ActionApi
         $this->version = $version;
         $this->actionName = $actionName;
         $this->transport = $transport;
-        $this->transportCopy = clone $transport;
         $this->logger = $logger;
         $this->typeCatalog = $typeCatalog;
         $this->mapping = $mapping;
@@ -111,7 +110,7 @@ final class WorkerAction extends ActionApi
             $this->version,
             $this->actionName,
             new ActionTarget($service, new VersionString($version), $action),
-            $this->transportCopy,
+            $this->transport,
             $address,
             $params,
             $files,

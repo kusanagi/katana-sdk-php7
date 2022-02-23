@@ -42,13 +42,6 @@ class ActionApi extends Api implements Action
     protected $transport;
 
     /**
-     * Copy of the Transport to send in runtime calls.
-     *
-     * @var Transport
-     */
-    protected $transportCopy;
-
-    /**
      * @var ZeroMQRuntimeCaller
      */
     protected $caller;
@@ -111,7 +104,6 @@ class ActionApi extends Api implements Action
         $this->actionName = $actionName;
         $this->caller = $caller;
         $this->transport = $transport;
-        $this->transportCopy = clone $transport;
         $this->typeCatalog = $typeCatalog;
         $this->params = $this->prepareParams($params);
     }
@@ -398,7 +390,7 @@ class ActionApi extends Api implements Action
             $this->version,
             $this->actionName,
             new ActionTarget($service, new VersionString($version), $action),
-            $this->transportCopy,
+            $this->transport,
             $address,
             $params,
             $files,
