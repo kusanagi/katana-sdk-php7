@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.6] - 2022-02-21
+- Fix return value in action workers
+
+## [1.3.5] - 2022-02-21
+- Add support for action workers
+
 ## [1.3.4] - 2022-02-21
 - Add ActionApi::getTimeout()
 
