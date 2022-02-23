@@ -56,7 +56,7 @@ class ActionApi extends Api implements Action
     /**
      * @var mixed
      */
-    private $return;
+    protected $return;
 
     /**
      * @var TypeCatalog
@@ -637,5 +637,6 @@ class ActionApi extends Api implements Action
     public function applyWorkerAction(WorkerAction $workerAction)
     {
         $this->transport = $workerAction->getTransport();
+        $this->return = $workerAction->return;
     }
 }
