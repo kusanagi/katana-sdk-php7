@@ -71,8 +71,10 @@ class ServiceApiFactory extends ApiFactory
         );
 
         $transport = $this->mapper->getTransport($data);
+        $logger = $this->logger->getRequestLogger($transport->getMeta()->getId());
+        $logger->info('Processing IPC message from ' . $input->getSocket());
         return new ActionApi(
-            $this->logger->getRequestLogger($transport->getMeta()->getId()),
+            $logger,
             $this->component,
             $mapping,
             dirname(realpath($_SERVER['SCRIPT_FILENAME'])),
