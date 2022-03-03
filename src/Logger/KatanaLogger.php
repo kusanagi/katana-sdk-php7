@@ -36,6 +36,9 @@ abstract class KatanaLogger
         self::LOG_NONE => 'NONE',
     ];
 
+    const MAX_LOG_LENGTH = 65535;
+    const LOG_TRUNCATE_REPLACEMENT = '... (truncated)';
+
     /**
      * @var int
      */
@@ -87,7 +90,15 @@ abstract class KatanaLogger
             return;
         }
 
-        echo $this->formatMessage($level, $message), "\n";
+        $log = $this->formatMessage($level, '{{message}}');
+        $logLength = strlen($log) + strlen($message) - 11;
+
+        if ($logLength > self::MAX_LOG_LENGTH) {
+            $messageExcessLength = self::MAX_LOG_LENGTH - $logLength - strlen(self::LOG_TRUNCATE_REPLACEMENT);
+            $message = substr($message, 0, $messageExcessLength) . self::LOG_TRUNCATE_REPLACEMENT;
+        }
+
+        echo str_replace('{{message}}', $message, $log), "\n";
     }
 
     /**
