@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.3.6] - 2022-02-21
+## [1.3.10] - 2022-03-03
+- Added socket log
+
+## [1.3.9] - 2022-03-03
+- Limit the long length to keep it within katana data type limits.
+
+## [1.3.8] - 2022-03-02
+- Add a log with the socket that receives each request in the service
+
+## [1.3.7] - 2022-02-23
+- Remove transport copy which was losing data on runtime calls
+
+## [1.3.6] - 2022-02-23
 - Fix return value in action workers
 
 ## [1.3.5] - 2022-02-21
