@@ -20,6 +20,7 @@ use Katana\Sdk\Api\Error;
 use Katana\Sdk\Api\File;
 use Katana\Sdk\Api\Param;
 use Katana\Sdk\Api\RemoteCall;
+use Katana\Sdk\Api\RuntimeCall;
 use Katana\Sdk\Api\ServiceOrigin;
 use Katana\Sdk\Api\Transaction;
 use Katana\Sdk\Api\Transport;
@@ -744,11 +745,11 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
             $rawMeta['i'],
             $rawMeta['d'],
             $rawMeta['s'] ?? '',
-            $rawMeta['e'] ?? '',
+            '',
             $rawMeta['D'] ?? 0,
             $rawMeta['g'],
             $rawMeta['o'],
-            $rawMeta['l'],
+            $rawMeta['l'] - 1,
             isset($rawMeta['p'])? $rawMeta['p'] : []
         );
         $meta->setFallbacks($rawMeta['f'] ?? []);
@@ -827,7 +828,17 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
         foreach ($replaceData['C'] ?? [] as $service => $sCalls) {
             foreach ($sCalls as $version => $vCalls) {
                 foreach ($vCalls as $vCall) {
-                    if (isset($vCall['g'])) {
+                    if (isset($vCall['D']) && $vCall['D'] !== 0) {
+                        $call = new RuntimeCall(
+                            new ServiceOrigin($service, $version),
+                            $vCall['C'],
+                            $vCall['n'],
+                            new VersionString($vCall['v']),
+                            $vCall['a'],
+                            $vCall['D'],
+                            isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
+                        );
+                    } elseif (isset($vCall['g'])) {
                         $call = new RemoteCall(
                             new ServiceOrigin($service, $version),
                             $vCall['C'],
@@ -835,7 +846,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                             $vCall['n'],
                             new VersionString($vCall['v']),
                             $vCall['a'],
-                            $vCall['D'] ?? 0,
+                            0,
                             $vCall['t'],
                             isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
                         );
@@ -846,7 +857,7 @@ class CompactTransportMapper implements TransportWriterInterface, TransportReade
                             $vCall['n'],
                             new VersionString($vCall['v']),
                             $vCall['a'],
-                            $vCall['D'] ?? 0,
+                            0,
                             isset($vCall['p']) ? array_map([$this, 'getParam'], $vCall['p']) : []
                         );
                     }
