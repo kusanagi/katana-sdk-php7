@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.11] - 2022-03-07
+- Fix calls replacement after a runtime call
+
 ## [1.3.10] - 2022-03-03
 - Added socket log
 
