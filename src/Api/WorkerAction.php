@@ -55,6 +55,7 @@ final class WorkerAction extends ActionApi
         RequestKatanaLogger $logger,
         TypeCatalog $typeCatalog,
         Mapping $mapping,
+        array $variables = [],
         array $params = []
     ) {
         $this->name = $name;
@@ -64,6 +65,7 @@ final class WorkerAction extends ActionApi
         $this->logger = $logger;
         $this->typeCatalog = $typeCatalog;
         $this->mapping = $mapping;
+        $this->variables = $variables;
         $this->params = $this->prepareParams($params);
     }
 

@@ -622,6 +622,7 @@ class ActionApi extends Api implements Action
             $this->logger,
             $this->typeCatalog,
             $this->mapping,
+            $this->variables,
             $this->params
         );
     }
