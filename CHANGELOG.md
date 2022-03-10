@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.13] - 2022-03-10
+- Pass variables when creating a worker action
+
 ## [1.3.12] - 2022-03-07
 - Fix level, end date and remote call on transport report
 
